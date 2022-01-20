@@ -5,7 +5,7 @@ with a multi tenant application. Your certificates used for getting access token
 
 Managed Identities are great but they [don't support multi-tenant use cases](https://docs.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/managed-identities-faq#can-i-use-a-managed-identity-to-access-a-resource-in-a-different-directorytenant), until now.
 
-This library is created by [Smartersoft B.V.](https://smartersoft.nl) and [licensed](./LICENSE) as **GPL-3.0-only**.
+This library is created by [Smartersoft B.V.](https://smartersoft.nl) and [licensed](./LICENSE.txt) as **GPL-3.0-only**.
 
 ## Packages
 

@@ -8,7 +8,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Deploy", "Deploy", "{1CA888C2-89BC-4DA4-A9FB-885673089C2A}"
 	ProjectSection(SolutionItems) = preProject
 		.pipeline.yml = .pipeline.yml
-		Gitversion.yml = Gitversion.yml
+		GitVersion.yml = GitVersion.yml
 	EndProjectSection
 EndProject
 Global
