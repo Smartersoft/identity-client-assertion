@@ -1,0 +1,24 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+	  <TargetFrameworks>netcoreapp3.1;net6.0</TargetFrameworks>
+	  <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+      <Nullable>enable</Nullable>
+	  <Authors>Smartersoft B.V.</Authors>
+	  <Company>Smartersoft B.V.</Company>
+	  <PackageReadmeFile>README.md</PackageReadmeFile>
+	  <Copyright>2022</Copyright>
+	  <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Azure.Identity" Version="1.5.0" />
+		<PackageReference Include="Azure.Security.KeyVault.Certificates" Version="4.2.0" />
+		<PackageReference Include="Azure.Security.KeyVault.Keys" Version="4.2.0" />
+		<PackageReference Include="Microsoft.Identity.Client" Version="4.40.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Include="..\..\docs\Smartersoft.Identity.Client.Assertion.md" Pack="true" PackagePath="\README.md"/>
+	</ItemGroup>
+</Project>

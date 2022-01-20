@@ -1,0 +1,10 @@
+assembly-versioning-scheme: MajorMinorPatch
+mode: Mainline
+branches:
+  feature:
+    tag: beta
+  beta:
+    tag: beta
+ignore:
+  sha: []
+merge-message-formats: {}

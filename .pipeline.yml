@@ -1,0 +1,64 @@
+trigger:
+  branches:
+   include:
+     - master
+     - beta
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  project: './src/Smartersoft.Identity.Client.Assertion/Smartersoft.Identity.Client.Assertion.csproj'
+  testProject: '**/*.Tests.csproj'
+  buildPlatform: 'Any CPU'
+  buildConfiguration: 'Release'
+
+steps:
+- task: gitversion/setup@0
+  displayName: Install GitVersion
+  inputs:
+    versionSpec: '5.x'
+
+- task: gitversion/execute@0
+  displayName: Determine Version
+  inputs:
+    useConfigFile: true
+    configFilePath: './GitVersion.yml'
+
+- task: UseDotNet@2
+  inputs:
+    packageType: 'sdk'
+    version: '6.x'
+
+- task: DotNetCoreCLI@2
+  displayName: Restore dependencies
+  inputs:
+    command: 'restore'
+    verbosityRestore: 'Minimal'
+    projects: |
+      $(project)
+    arguments: '/p:Version=$(GitVersion.NuGetVersionV2)'
+    versioningScheme: byBuildNumber
+
+- task: DotNetCoreCLI@2
+  displayName: Build
+  inputs:
+    projects: '$(project)'
+    arguments: '--configuration $(BuildConfiguration) /p:Version=$(GitVersion.NuGetVersionV2) --no-restore'
+
+- task: DotNetCoreCLI@2
+  displayName: Pack
+  inputs:
+    command: pack
+    nobuild: true
+    includesymbols: false
+    versioningScheme: byEnvVar
+    versionEnvVar: GitVersion.NugetVersionV2
+
+- task: DotNetCoreCLI@2
+  displayName: 'Nuget publish'
+  inputs:
+    command: 'push'
+    packagesToPush: '$(Build.ArtifactStagingDirectory)/*.nupkg'
+    nuGetFeedType: 'internal'
+    publishVstsFeed: '2e414348-7aa7-4750-8681-c91e163fec25'
