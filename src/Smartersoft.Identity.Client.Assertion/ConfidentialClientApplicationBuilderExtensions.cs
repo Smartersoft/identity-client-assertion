@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading;
 
-namespace Smartersoft.Idenity.Client.Assertion
+namespace Smartersoft.Identity.Client.Assertion
 {
     /// <summary>
     /// KeyVault extensions for Microsoft.Identity.Client.ConfidentialClientApplicationBuilder

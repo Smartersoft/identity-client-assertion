@@ -3,7 +3,7 @@
   <PropertyGroup>
 	  <TargetFrameworks>netcoreapp3.1;net6.0</TargetFrameworks>
 	  <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
-      <Nullable>enable</Nullable>
+    <Nullable>enable</Nullable>
 	  <Authors>Smartersoft B.V.</Authors>
 	  <Company>Smartersoft B.V.</Company>
 	  <PackageReadmeFile>README.md</PackageReadmeFile>

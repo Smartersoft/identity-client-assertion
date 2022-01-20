@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Smartersoft.Idenity.Client.Assertion
+namespace Smartersoft.Identity.Client.Assertion
 {
     /// <summary>
     /// Info about a certificate stored in the KeyVault

@@ -10,7 +10,7 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Smartersoft.Idenity.Client.Assertion
+namespace Smartersoft.Identity.Client.Assertion
 {
     /// <summary>
     /// Generator for Signed client assertions

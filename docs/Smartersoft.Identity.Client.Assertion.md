@@ -1,4 +1,4 @@
-# Smartersoft.Idenity.Client.Assertion
+# Smartersoft.Identity.Client.Assertion
 
 This package allows you to use [Managed Identities](https://docs.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/overview)
 with a multi tenant application. Your certificates used for getting access tokens with the **Client Credential** flow will be completely protected and can **NEVER** be extracted, not even by yourself.
@@ -42,7 +42,7 @@ using Microsoft.Identity.Client;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Smartersoft.Idenity.Client.Assertion;
+using Smartersoft.Identity.Client.Assertion;
 ```
 
 ## Get access token using certificate in KeyVault
