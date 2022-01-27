@@ -38,7 +38,7 @@ namespace Smartersoft.Identity.Client.Assertion
         public static ConfidentialClientApplicationBuilder WithKeyVaultCertificate(this ConfidentialClientApplicationBuilder applicationBuilder, string tenantId, string clientId, Uri vaultUri, string certificateName, TokenCredential tokenCredential)
         {
             return applicationBuilder
-                .WithAuthority(AzureCloudInstance.AzurePublic, tenantId)
+                //.WithAuthority(AzureCloudInstance.AzurePublic, tenantId)
                 .WithClientAssertion((CancellationToken cancellationToken) =>
                     ClientAssertionGenerator.GetSignedTokenWithKeyVaultCertificate(tenantId, clientId, vaultUri, certificateName, tokenCredential, cancellationToken: cancellationToken)
                 );
@@ -70,7 +70,7 @@ namespace Smartersoft.Identity.Client.Assertion
         public static ConfidentialClientApplicationBuilder WithKeyVaultKey(this ConfidentialClientApplicationBuilder applicationBuilder, string tenantId, string clientId, Uri keyVaultKeyId, string kid, TokenCredential tokenCredential)
         {
             return applicationBuilder
-                .WithAuthority(AzureCloudInstance.AzurePublic, tenantId)
+                //.WithAuthority(AzureCloudInstance.AzurePublic, tenantId)
                 .WithClientAssertion((CancellationToken cancellationToken) =>
                     ClientAssertionGenerator.GetSignedTokenWithKeyVaultKey(tenantId, clientId, keyVaultKeyId, kid, tokenCredential, cancellationToken: cancellationToken)
                 );

@@ -42,19 +42,18 @@ namespace Smartersoft.Identity.Client.Assertion
         /// <summary>
         /// Generate the required claims for a client assertion
         /// </summary>
-        /// <param name="tenantId">Tenant ID for which this token will be used</param>
+        /// <param name="audience">Audience token is used for eg `https://login.microsoftonline.com/{tenantId}/v2.0` </param>
         /// <param name="clientId">Client ID of the calling application</param>
         /// <param name="lifetime">optional lifetime</param>
         /// <returns></returns>
-        public static IDictionary<string, object> GenerateClaims(string tenantId, string clientId, int lifetime = 300)
+        public static IDictionary<string, object> GenerateClaimsForAudience(string audience, string clientId, int lifetime = 300)
         {
-            string aud = $"https://login.microsoftonline.com/{tenantId}/v2.0";
-            DateTimeOffset now = DateTimeOffset.UtcNow;
-            DateTimeOffset validFrom = now.AddSeconds(-30);
-            DateTimeOffset validUntil = now.AddSeconds(lifetime);
+            
+            DateTimeOffset validFrom = DateTimeOffset.UtcNow;
+            DateTimeOffset validUntil = validFrom.AddSeconds(lifetime);
             return new Dictionary<string, object>()
             {
-                { "aud", aud },
+                { "aud", audience },
                 { "exp", validUntil.ToUnixTimeSeconds() },
                 { "iss", clientId },
                 { "jti", Guid.NewGuid().ToString() },
@@ -62,6 +61,20 @@ namespace Smartersoft.Identity.Client.Assertion
                 { "sub", clientId }
             };
         }
+
+        /// <summary>
+        /// Generate the required claims for a client assertion
+        /// </summary>
+        /// <param name="tenantId">Tenant ID for which this token will be used</param>
+        /// <param name="clientId">Client ID of the calling application</param>
+        /// <param name="lifetime">optional lifetime</param>
+        /// <returns></returns>
+        public static IDictionary<string, object> GenerateClaimsForTenant(string tenantId, string clientId, int lifetime = 300)
+        {
+            string aud = $"https://login.microsoftonline.com/{tenantId}/v2.0";
+            return GenerateClaimsForAudience(aud, clientId, lifetime);
+        }
+
 
         /// <summary>
         /// Generate the JWT header for the client assertion
@@ -73,8 +86,24 @@ namespace Smartersoft.Identity.Client.Assertion
             return new Dictionary<string, string>()
             {
                 { "alg", "RS256"},
-                { "kid", kid }
+                { "typ", "JWT"},
+                { "x5t", kid }
             };
+        }
+
+        /// <summary>
+        /// Generate the first two parts of the client assertion (no signature)
+        /// </summary>
+        /// <param name="kid">Base64Url encoded hash of the certificate</param>
+        /// <param name="assertionClaims">Client assertion claims</param>
+        /// <returns></returns>
+        public static string GetUnsignedToken(string kid, IDictionary<string,object> assertionClaims)
+        {
+            var header = GenerateHeader(kid);
+
+            var headerBytes = JsonSerializer.SerializeToUtf8Bytes(header);
+            var claimsBytes = JsonSerializer.SerializeToUtf8Bytes(assertionClaims);
+            return Base64UrlEncode(headerBytes) + "." + Base64UrlEncode(claimsBytes);
         }
 
         /// <summary>
@@ -86,12 +115,7 @@ namespace Smartersoft.Identity.Client.Assertion
         /// <returns></returns>
         public static string GetUnsignedToken(string kid, string tenantId, string clientId)
         {
-            var header = GenerateHeader(kid);
-            var claims = GenerateClaims(tenantId, clientId);
-
-            var headerBytes = JsonSerializer.SerializeToUtf8Bytes(header);
-            var claimsBytes = JsonSerializer.SerializeToUtf8Bytes(claims);
-            return Base64UrlEncode(headerBytes) + "." + Base64UrlEncode(claimsBytes);
+            return GetUnsignedToken(kid, GenerateClaimsForTenant(tenantId, clientId));
         }
 
         /// <summary>
@@ -120,6 +144,28 @@ namespace Smartersoft.Identity.Client.Assertion
         /// <summary>
         /// Create a signed client assertion with a Key in the KeyVault
         /// </summary>
+        /// <param name="assertionClaims">Claims in client assertion, use `GenerateClaimsForAudience` or `GenerateClaimsForTenant`</param>
+        /// <param name="keyId">KeyId, Uri of the actual key in the KeyVault</param>
+        /// <param name="kid">The Base64Url encoded hash of the certificate, use GetCertificateInfoFromKeyVault</param>
+        /// <param name="tokenCredential">Use any TokenCredential (eg. new DefaultTokenCredential())</param>
+        /// <param name="cancellationToken">Use cancellation token if preferred</param>
+        /// <remarks>Needs Key => Sign permission, the client assertion is signed in the KeyVault</remarks>
+        /// <returns>Signed client assertion</returns>
+        public static async Task<string> GetSignedTokenWithKeyVaultKey(IDictionary<string, object> assertionClaims, Uri keyId, string kid, TokenCredential tokenCredential, CancellationToken cancellationToken = default)
+        {
+            var unsignedToken = GetUnsignedToken(kid, assertionClaims);
+            var cryptographyClient = new CryptographyClient(keyId, tokenCredential);
+
+            // The signing takes place at the KeyVault, the private key never reaches the client.
+            // This needs the `Key => Sign` permission, and counts as a KeyVault operation.
+            var signResult = await cryptographyClient.SignDataAsync(SignatureAlgorithm.RS256, Encoding.UTF8.GetBytes(unsignedToken), cancellationToken);
+
+            return unsignedToken + "." + Base64UrlEncode(signResult.Signature);
+        }
+
+        /// <summary>
+        /// Create a signed client assertion with a Key in the KeyVault
+        /// </summary>
         /// <param name="tenantId">Tenant ID for which you want to use this token</param>
         /// <param name="clientId">Client Identifier</param>
         /// <param name="keyId">KeyId, Uri of the actual key in the KeyVault</param>
@@ -128,16 +174,9 @@ namespace Smartersoft.Identity.Client.Assertion
         /// <param name="cancellationToken">Use cancellation token if preferred</param>
         /// <remarks>Needs Key => Sign permission, the client assertion is signed in the KeyVault</remarks>
         /// <returns>Signed client assertion</returns>
-        public static async Task<string> GetSignedTokenWithKeyVaultKey(string tenantId, string clientId, Uri keyId, string kid, TokenCredential tokenCredential, CancellationToken cancellationToken = default)
+        public static Task<string> GetSignedTokenWithKeyVaultKey(string tenantId, string clientId, Uri keyId, string kid, TokenCredential tokenCredential, CancellationToken cancellationToken = default)
         {
-            var unsignedToken = GetUnsignedToken(kid, tenantId, clientId);
-            var cryptographyClient = new CryptographyClient(keyId, tokenCredential);
-
-            // The signing takes place at the KeyVault, the private key never reaches the client.
-            // This needs the `Key => Sign` permission, and counts as a KeyVault operation.
-            var signResult = await cryptographyClient.SignDataAsync(SignatureAlgorithm.RS256, Encoding.UTF8.GetBytes(unsignedToken), cancellationToken);
-
-            return unsignedToken + "." + Base64UrlEncode(signResult.Signature);
+            return GetSignedTokenWithKeyVaultKey(GenerateClaimsForTenant(tenantId, clientId), keyId, kid, tokenCredential, cancellationToken);
         }
 
         /// <summary>
@@ -170,14 +209,14 @@ namespace Smartersoft.Identity.Client.Assertion
         /// <summary>
         /// Fetches information about the certificate (should be cached!), and then signs a token with the info from the KeyVault
         /// </summary>
-        /// <param name="tenantId">Tenant ID for which you want to use this token</param>
-        /// <param name="clientId">Client Identifier</param>
+        /// <param name="assertionClaims">Claims in client assertion, use `GenerateClaimsForAudience` or `GenerateClaimsForTenant`</param>
         /// <param name="vaultUri">Uri of the KeyVault</param>
         /// <param name="certificateName">Name of certificate</param>
         /// <param name="tokenCredential">Use any TokenCredential (eg. new DefaultTokenCredential())</param>
         /// <param name="cancellationToken">Use cancellation token if preferred</param>
         /// <returns>Signed client assertion</returns>
-        public static async Task<string> GetSignedTokenWithKeyVaultCertificate(string tenantId, string clientId, Uri vaultUri, string certificateName, TokenCredential tokenCredential, CancellationToken cancellationToken = default)
+        /// <remarks>`GetSignedTokenWithKeyVaultKey` is perferred over this method</remarks>
+        public static async Task<string> GetSignedTokenWithKeyVaultCertificate(IDictionary<string, object> assertionClaims, Uri vaultUri, string certificateName, TokenCredential tokenCredential, CancellationToken cancellationToken = default)
         {
             var certInfo = await GetCertificateInfoFromKeyVault(vaultUri, certificateName, tokenCredential, cancellationToken);
 
@@ -186,7 +225,23 @@ namespace Smartersoft.Identity.Client.Assertion
                 throw new ArgumentNullException(nameof(certInfo));
             }
 
-            return await GetSignedTokenWithKeyVaultKey(tenantId, clientId, certInfo.KeyId, certInfo.Kid, tokenCredential, cancellationToken);
+            return await GetSignedTokenWithKeyVaultKey(assertionClaims, certInfo.KeyId, certInfo.Kid, tokenCredential, cancellationToken);
+        }
+
+        /// <summary>
+        /// Fetches information about the certificate (should be cached!), and then signs a token with the info from the KeyVault
+        /// </summary>
+        /// <param name="tenantId">Tenant ID for which you want to use this token</param>
+        /// <param name="clientId">Client Identifier</param>
+        /// <param name="vaultUri">Uri of the KeyVault</param>
+        /// <param name="certificateName">Name of certificate</param>
+        /// <param name="tokenCredential">Use any TokenCredential (eg. new DefaultTokenCredential())</param>
+        /// <param name="cancellationToken">Use cancellation token if preferred</param>
+        /// <returns>Signed client assertion</returns>
+        /// <remarks>`GetSignedTokenWithKeyVaultKey` is perferred over this method</remarks>
+        public static Task<string> GetSignedTokenWithKeyVaultCertificate(string tenantId, string clientId, Uri vaultUri, string certificateName, TokenCredential tokenCredential, CancellationToken cancellationToken = default)
+        {
+            return GetSignedTokenWithKeyVaultCertificate(GenerateClaimsForTenant(tenantId, clientId), vaultUri, certificateName, tokenCredential, cancellationToken);
         }
     }
 }

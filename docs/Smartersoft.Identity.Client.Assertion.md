@@ -7,6 +7,8 @@ Managed Identities are great but they [don't support multi-tenant use cases](htt
 
 This library is created by [Smartersoft B.V.](https://smartersoft.nl) and [licensed](../LICENSE.txt) as **GPL-3.0-only**.
 
+More details on this library in [this post](https://svrooij.io/2022/01/20/secure-multi-tenant-app/#post)
+
 ## Prerequisites
 
 - Azure resource with support for managed identities (Azure Functions, App Service, ...)
@@ -27,7 +29,7 @@ When using a certificate for client assertions a self-signed certificate will su
 6. Set a Validity period (`12 months` is the default, which is fine)
 7. Leave Content Type to `PKCS #12`
 8. Set Lifetime action Type to `E-mail all contacts...` instead of auto-renew. You'll need to know when you'll have to take action.
-9. **Configure** Advanced Policy Configuration! Set X.509 Key Usage Flags to `Digital Signature` only and Exportable Private Key to `No`. Leave the rest to their default setting.
+9. **Configure** Advanced Policy Configuration! Set **X.509 Key Usage Flags** to `Digital Signature` only and **Exportable Private Key** to `No`. Leave the rest to their default setting.
 10. Click Create
 11. Click the new certificate, click the version, download in CER format (needed in app registration).
 
@@ -62,6 +64,7 @@ using Smartersoft.Identity.Client.Assertion;
         // but call `.WithKeyVaultCertificate(...)` instead of `.WithCertificate(...)`
         var app = ConfidentialClientApplicationBuilder
             .Create(clientId)
+            .WithAuthority(AzureCloudInstance.AzurePublic, tenantId)
             .WithKeyVaultCertificate(tenantId, clientId, new Uri(KeyVaultUri), certificateName, tokenCredential)
             .Build();
 
@@ -109,6 +112,7 @@ It can be loaded only once and saved in a config file to reduce the calls to the
         // but call `.WithKeyVaultKey(...)` instead of `.WithCertificate(...)`
         var app = ConfidentialClientApplicationBuilder
             .Create(clientId)
+            .WithAuthority(AzureCloudInstance.AzurePublic, tenantId)
             .WithKeyVaultKey(tenantId, clientId, keyId, kid, tokenCredential)
             .Build();
 
