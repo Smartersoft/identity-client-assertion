@@ -9,6 +9,7 @@ pool:
 
 variables:
   project: './src/Smartersoft.Identity.Client.Assertion/Smartersoft.Identity.Client.Assertion.csproj'
+  proxyProject: './src/Smartersoft.Identity.Client.Assertion.Proxy/Smartersoft.Identity.Client.Assertion.Proxy.csproj'
   testProject: '**/*.Tests.csproj'
   buildPlatform: 'Any CPU'
   buildConfiguration: 'Release'
@@ -31,7 +32,7 @@ steps:
     version: '6.x'
 
 - task: DotNetCoreCLI@2
-  displayName: Restore dependencies
+  displayName: Restore dependencies library
   inputs:
     command: 'restore'
     verbosityRestore: 'Minimal'
@@ -41,13 +42,29 @@ steps:
     versioningScheme: byBuildNumber
 
 - task: DotNetCoreCLI@2
-  displayName: Build
+  displayName: Build library
   inputs:
     projects: '$(project)'
     arguments: '--configuration $(BuildConfiguration) /p:Version=$(GitVersion.NuGetVersionV2) --no-restore'
 
 - task: DotNetCoreCLI@2
-  displayName: Pack
+  displayName: Restore dependencies proxy
+  inputs:
+    command: 'restore'
+    verbosityRestore: 'Minimal'
+    projects: |
+      $(proxyProject)
+    arguments: '/p:Version=$(GitVersion.NuGetVersionV2)'
+    versioningScheme: byBuildNumber
+
+- task: DotNetCoreCLI@2
+  displayName: Build proxy
+  inputs:
+    projects: '$(proxyProject)'
+    arguments: '--configuration $(BuildConfiguration) /p:Version=$(GitVersion.NuGetVersionV2) --no-restore'
+
+- task: DotNetCoreCLI@2
+  displayName: Package library and proxy
   inputs:
     command: pack
     nobuild: true

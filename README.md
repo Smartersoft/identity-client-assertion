@@ -10,3 +10,5 @@ This library is created by [Smartersoft B.V.](https://smartersoft.nl) and [licen
 ## Packages
 
 - [Smartersoft.Identity.Client.Assertion](docs/Smartersoft.Identity.Client.Assertion.md)
+- [Smartersoft.Identity.Client.Assertion.Proxy](docs/Smartersoft.Identity.Client.Assertion.Proxy
+.md)

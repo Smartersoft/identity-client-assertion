@@ -1,0 +1,38 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Authors>Smartersoft B.V.,Stephan van Rooij</Authors>
+	<Company>Smartersoft B.V.</Company>
+	<PackageReadmeFile>README.md</PackageReadmeFile>
+	<Copyright>2022</Copyright>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+	<PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
+    <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
+	<RepositoryType>git</RepositoryType>
+	<PackageProjectUrl>https://github.com/Smartersoft/identity-client-assertion</PackageProjectUrl>
+    <Description>Token endpoints using certificates, to be used during development to don't expose certificates on dev machines</Description>
+	<RepositoryUrl>https://github.com/Smartersoft/identity-client-assertion.git</RepositoryUrl>
+	<PackageTags>Managed Identity;Postman;Insomnia</PackageTags>
+	<PackAsTool>true</PackAsTool>
+	<ToolCommandName>az-kv-proxy</ToolCommandName>
+	<IsPackable>true</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FluentValidation.AspNetCore" Version="10.3.6" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Smartersoft.Identity.Client.Assertion\Smartersoft.Identity.Client.Assertion.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+		<None Include="..\..\docs\Smartersoft.Identity.Client.Assertion.Proxy.md" Pack="true" PackagePath="\README.md" />
+		<None Include="..\..\LICENSE.txt" Pack="true" PackagePath="\LICENSE.txt" />
+	</ItemGroup>
+
+</Project>
