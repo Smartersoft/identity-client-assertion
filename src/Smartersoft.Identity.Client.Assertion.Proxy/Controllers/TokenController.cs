@@ -75,7 +75,7 @@ namespace Smartersoft.Identity.Client.Assertion.Proxy.Controllers
         [HttpPost("local-certificate")]
         [ProducesResponseType(typeof(Models.TokenResponse), 200)]
         [ProducesResponseType(typeof(ProblemDetails), 400)]
-        public async Task<ActionResult<Models.TokenResponse>> LocalAccessToken([FromBody] Models.LocalTokenRequest tokenRequest, CancellationToken cancellationToken)
+        public async Task<ActionResult<Models.TokenResponse>> UserCertAccessToken([FromBody] Models.LocalTokenRequest tokenRequest, CancellationToken cancellationToken)
         {
             _logger.LogInformation("Token request with local certificate @{tokenRequest}", tokenRequest);
             var store = new X509Store(StoreLocation.CurrentUser);
@@ -97,8 +97,35 @@ namespace Smartersoft.Identity.Client.Assertion.Proxy.Controllers
             return Ok(Models.TokenResponse.FromAuthenticationResult(authResult));
         }
 
-        
-        
-        
+        [HttpPost("computer-certificate")]
+        [ProducesResponseType(typeof(Models.TokenResponse), 200)]
+        [ProducesResponseType(typeof(ProblemDetails), 400)]
+        public async Task<ActionResult<Models.TokenResponse>> ComputerCertAccessToken([FromBody] Models.LocalTokenRequest tokenRequest, CancellationToken cancellationToken)
+        {
+            _logger.LogInformation("Token request with local certificate @{tokenRequest}", tokenRequest);
+            var store = new X509Store(StoreLocation.LocalMachine);
+            store.Open(OpenFlags.ReadOnly);
+            var certificates = store.Certificates.Find(tokenRequest.FindType ?? X509FindType.FindByThumbprint, tokenRequest.FindValue, true);
+            if (certificates == null || certificates.Count == 0)
+            {
+                return NotFound();
+            }
+
+            var app = ConfidentialClientApplicationBuilder
+                .Create(tokenRequest.ClientId)
+                .WithAuthority(AzureCloudInstance.AzurePublic, tokenRequest.TenantId)
+                .WithCertificate(certificates.First())
+                .Build();
+
+            var authResult = await app
+                .AcquireTokenForClient(tokenRequest.Scopes)
+                .ExecuteAsync(cancellationToken);
+
+            return Ok(Models.TokenResponse.FromAuthenticationResult(authResult));
+        }
+
+
+
+
     }
 }
