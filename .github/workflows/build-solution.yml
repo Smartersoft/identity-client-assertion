@@ -4,7 +4,6 @@ on:
   push:
     branches:
     - main
-    - docs-and-ci
   pull_request:
     branches:
     - main
