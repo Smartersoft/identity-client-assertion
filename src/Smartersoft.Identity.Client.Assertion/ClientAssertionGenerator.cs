@@ -48,7 +48,7 @@ namespace Smartersoft.Identity.Client.Assertion
         /// <returns></returns>
         public static IDictionary<string, object> GenerateClaimsForAudience(string audience, string clientId, int lifetime = 300)
         {
-            
+
             DateTimeOffset validFrom = DateTimeOffset.UtcNow;
             DateTimeOffset validUntil = validFrom.AddSeconds(lifetime);
             return new Dictionary<string, object>()
@@ -97,7 +97,7 @@ namespace Smartersoft.Identity.Client.Assertion
         /// <param name="kid">Base64Url encoded hash of the certificate</param>
         /// <param name="assertionClaims">Client assertion claims</param>
         /// <returns></returns>
-        public static string GetUnsignedToken(string kid, IDictionary<string,object> assertionClaims)
+        public static string GetUnsignedToken(string kid, IDictionary<string, object> assertionClaims)
         {
             var header = GenerateHeader(kid);
 

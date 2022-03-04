@@ -6,24 +6,33 @@ using System.Security.Cryptography.X509Certificates;
 
 namespace Smartersoft.Identity.Client.Assertion.Proxy.Controllers
 {
+    /// <summary>
+    /// TokenController hosting all the KeyVault proxy endpoints
+    /// </summary>
     [Route("api/[controller]")]
-    
     [ApiController]
     public class TokenController : ControllerBase
     {
         private readonly ILogger<TokenController> _logger;
 
+        /// <summary>
+        /// TokenController constructor
+        /// </summary>
+        /// <param name="logger"></param>
         public TokenController(ILogger<TokenController> logger)
         {
             _logger = logger;
         }
 
+        /// <summary>
+        /// Get access token with KeyVault key
+        /// </summary>
         [HttpPost("kv-key")]
         [ProducesResponseType(typeof(Models.TokenResponse), 200)]
         [ProducesResponseType(typeof(ProblemDetails), 400)]
         public async Task<ActionResult<Models.TokenResponse>> KvKeyAccessToken([FromBody] Models.KeyVaultKeyTokenRequest tokenRequest, CancellationToken cancellationToken)
         {
-            _logger.LogInformation("Token request with Key Vault key {clientId}, {keyUri}", tokenRequest.ClientId, tokenRequest.KeyUri.ToString());
+            _logger.LogInformation("Token request with Key Vault key {clientId}, {keyUri}", tokenRequest.ClientId, tokenRequest.KeyUri?.ToString());
 
 
             var app = ConfidentialClientApplicationBuilder
@@ -39,6 +48,9 @@ namespace Smartersoft.Identity.Client.Assertion.Proxy.Controllers
             return Ok(Models.TokenResponse.FromAuthenticationResult(authResult));
         }
 
+        /// <summary>
+        /// Get key info about a certificate in the KeyVault
+        /// </summary>
         [HttpPost("kv-key-info")]
         [ProducesResponseType(typeof(CertificateInfo), 200)]
         [ProducesResponseType(typeof(ProblemDetails), 400)]
@@ -51,6 +63,10 @@ namespace Smartersoft.Identity.Client.Assertion.Proxy.Controllers
             return Ok(certInfo);
         }
 
+        /// <summary>
+        /// Get access token with certificate hosted in KeyVault
+        /// </summary>
+        /// <remarks>Fetching the key info with /api/Token/kv-key-info and using it with /api/Token/kv-key is way more efficient.</remarks>
         [HttpPost("kv-certificate")]
         [ProducesResponseType(typeof(Models.TokenResponse), 200)]
         [ProducesResponseType(typeof(ProblemDetails), 400)]
@@ -71,7 +87,9 @@ namespace Smartersoft.Identity.Client.Assertion.Proxy.Controllers
             return Ok(Models.TokenResponse.FromAuthenticationResult(authResult));
         }
 
-
+        /// <summary>
+        /// Get access token with certificate from the local user certificate store
+        /// </summary>
         [HttpPost("local-certificate")]
         [ProducesResponseType(typeof(Models.TokenResponse), 200)]
         [ProducesResponseType(typeof(ProblemDetails), 400)]
@@ -81,7 +99,7 @@ namespace Smartersoft.Identity.Client.Assertion.Proxy.Controllers
             var store = new X509Store(StoreLocation.CurrentUser);
             store.Open(OpenFlags.ReadOnly);
             var certificates = store.Certificates.Find(tokenRequest.FindType ?? X509FindType.FindByThumbprint, tokenRequest.FindValue, true);
-            if(certificates == null || certificates.Count == 0)
+            if (certificates == null || certificates.Count == 0)
             {
                 return NotFound();
             }
@@ -97,6 +115,9 @@ namespace Smartersoft.Identity.Client.Assertion.Proxy.Controllers
             return Ok(Models.TokenResponse.FromAuthenticationResult(authResult));
         }
 
+        /// <summary>
+        /// Get access token with certificate hosted in local computer certificate store
+        /// </summary>
         [HttpPost("computer-certificate")]
         [ProducesResponseType(typeof(Models.TokenResponse), 200)]
         [ProducesResponseType(typeof(ProblemDetails), 400)]
@@ -123,9 +144,5 @@ namespace Smartersoft.Identity.Client.Assertion.Proxy.Controllers
 
             return Ok(Models.TokenResponse.FromAuthenticationResult(authResult));
         }
-
-
-
-
     }
 }

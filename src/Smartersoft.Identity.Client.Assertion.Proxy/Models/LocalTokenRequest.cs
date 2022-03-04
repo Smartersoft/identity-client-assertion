@@ -2,14 +2,29 @@
 using System.Security.Cryptography.X509Certificates;
 namespace Smartersoft.Identity.Client.Assertion.Proxy.Models
 {
+    /// <summary>
+    /// Request an access token with a certificate in the local certificate store
+    /// </summary>
     public class LocalTokenRequest : TokenRequest
     {
+        /// <summary>
+        /// How do you want to search for the certificate
+        /// </summary>
         public X509FindType? FindType { get; set; } = X509FindType.FindByThumbprint;
-        public object FindValue { get; set; }
+        /// <summary>
+        /// With what value do you wish to search for the certificate?
+        /// </summary>
+        public object? FindValue { get; set; }
     }
 
+    /// <summary>
+    /// LocalTokenRequestValidator
+    /// </summary>
     public class LocalTokenRequestValidator : AbstractValidator<LocalTokenRequest>
     {
+        /// <summary>
+        /// LocalTokenRequestValidator constructor
+        /// </summary>
         public LocalTokenRequestValidator()
         {
             Include(new TokenRequestValidator());
