@@ -1,21 +1,20 @@
-name: Release az-kv-proxy
+name: Release extensions
 
 on:
   push:
     branches:
     - main
     paths:
-      - .github/workflows/release-proxy.yml
+      - .github/workflows/release-extensions.yml
       - src/Smartersoft.Identity.Client.Assertion/**/*.cs
-      - src/Smartersoft.Identity.Client.Assertion.Proxy/**/*.cs
-    
+
 jobs:
   build-and-push:
 
     env:
       BUILD_CONFIG: 'Release'
       SOLUTION: 'Smartersoft.Identity.Client.Assertion.sln'
-      PROJECT: 'src/Smartersoft.Identity.Client.Assertion.Proxy/Smartersoft.Identity.Client.Assertion.Proxy.csproj'
+      PROJECT: 'src/Smartersoft.Identity.Client.Assertion/Smartersoft.Identity.Client.Assertion.csproj'
 
     runs-on: ubuntu-latest
 
