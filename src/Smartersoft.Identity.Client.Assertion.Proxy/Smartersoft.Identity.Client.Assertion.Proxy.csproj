@@ -36,4 +36,9 @@
     <None Include="..\..\docs\Smartersoft.Identity.Client.Assertion.Proxy.md" Pack="true" PackagePath="\README.md" />
     <None Include="..\..\LICENSE.txt" Pack="true" PackagePath="\LICENSE.txt" />
   </ItemGroup>
+  <ItemGroup>
+    <Content Update="wwwroot\index.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
 </Project>
