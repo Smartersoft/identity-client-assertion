@@ -1,4 +1,5 @@
-﻿using Azure.Identity;
+﻿using Azure.Core;
+using Azure.Identity;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Identity.Client;
@@ -24,6 +25,14 @@ namespace Smartersoft.Identity.Client.Assertion.Proxy.Controllers
             _logger = logger;
         }
 
+        private TokenCredential GetTokenCredential() {
+            return new DefaultAzureCredential(new DefaultAzureCredentialOptions {
+                ExcludeEnvironmentCredential = true, // Don't use environment variables (even interactive is better)
+                ExcludeInteractiveBrowserCredential = false,
+                ExcludeManagedIdentityCredential = true, // Don't run this api in production!
+            });
+        }
+
         /// <summary>
         /// Get access token with KeyVault key
         /// </summary>
@@ -38,7 +47,7 @@ namespace Smartersoft.Identity.Client.Assertion.Proxy.Controllers
             var app = ConfidentialClientApplicationBuilder
                 .Create(tokenRequest.ClientId)
                 .WithAuthority(AzureCloudInstance.AzurePublic, tokenRequest.TenantId)
-                .WithKeyVaultKey(tokenRequest.TenantId, tokenRequest.ClientId, tokenRequest.KeyUri, tokenRequest.KeyThumbprint, new DefaultAzureCredential(true))
+                .WithKeyVaultKey(tokenRequest.TenantId, tokenRequest.ClientId, tokenRequest.KeyUri, tokenRequest.KeyThumbprint, GetTokenCredential())
                 .Build();
 
             var authResult = await app
@@ -58,7 +67,7 @@ namespace Smartersoft.Identity.Client.Assertion.Proxy.Controllers
         {
             _logger.LogInformation("Certificate info for Key Vault certificate {certificateName}", tokenRequest.CertificateName);
 
-            var certInfo = await ClientAssertionGenerator.GetCertificateInfoFromKeyVault(tokenRequest.KeyVaultUri, tokenRequest.CertificateName, new DefaultAzureCredential(true), cancellationToken);
+            var certInfo = await ClientAssertionGenerator.GetCertificateInfoFromKeyVault(tokenRequest.KeyVaultUri, tokenRequest.CertificateName, GetTokenCredential(), cancellationToken);
 
             return Ok(certInfo);
         }
@@ -77,7 +86,7 @@ namespace Smartersoft.Identity.Client.Assertion.Proxy.Controllers
             var app = ConfidentialClientApplicationBuilder
                 .Create(tokenRequest.ClientId)
                 .WithAuthority(AzureCloudInstance.AzurePublic, tokenRequest.TenantId)
-                .WithKeyVaultCertificate(tokenRequest.TenantId, tokenRequest.ClientId, tokenRequest.KeyVaultUri, tokenRequest.CertificateName, new DefaultAzureCredential(true))
+                .WithKeyVaultCertificate(tokenRequest.TenantId, tokenRequest.ClientId, tokenRequest.KeyVaultUri, tokenRequest.CertificateName, GetTokenCredential())
                 .Build();
 
             var authResult = await app
