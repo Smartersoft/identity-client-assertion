@@ -23,6 +23,10 @@ This library is created by [Smartersoft B.V.](https://smartersoft.nl) and [licen
 
 [Smartersoft.Identity.Client.Assertion.Proxy](docs/Smartersoft.Identity.Client.Assertion.Proxy.md) is a small api you can run on your local machine to use certificates stored in the KeyVault to secure your client credentials during development.
 
+## License
+
+These packages are [licensed][link_license] under `GPL-3.0`, if you wish to use this software under a different license. Or you feel that this really helped in your commercial application and wish to support us? You can [get in touch](https://smartersoft.nl/#contact) and we can talk terms. We are available as consultants.
+
 [badge_issues]: https://img.shields.io/github/issues/Smartersoft/identity-client-assertion?style=for-the-badge
 [badge_license]: https://img.shields.io/github/license/Smartersoft/identity-client-assertion?style=for-the-badge
 [badge_nuget_proxy]: https://img.shields.io/nuget/v/Smartersoft.Identity.Client.Assertion.Proxy?logoColor=00a880&style=for-the-badge

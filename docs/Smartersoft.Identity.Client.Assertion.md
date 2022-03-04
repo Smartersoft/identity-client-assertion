@@ -147,3 +147,7 @@ Off course this solution still needs a secure way to access the Key Vault, like 
 3. Asks the KeyVault to [Sign the data](https://docs.microsoft.com/en-us/dotnet/api/azure.security.keyvault.keys.cryptography.cryptographyclient.signdata?view=azure-dotnet).
 4. Encodes the signature Base64Url
 5. Appends the signature to the token
+
+## License
+
+These packages are [licensed][../LICENSE.txt] under `GPL-3.0`, if you wish to use this software under a different license. Or you feel that this really helped in your commercial application and wish to support us? You can [get in touch](https://smartersoft.nl/#contact) and we can talk terms. We are available as consultants.
