@@ -1,39 +1,35 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
-	  <TargetFrameworks>net6.0;netcoreapp3.1</TargetFrameworks>
-	  <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <TargetFrameworks>net6.0;netcoreapp3.1</TargetFrameworks>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <Nullable>enable</Nullable>
-	  <Authors>Smartersoft B.V.,Stephan van Rooij</Authors>
-	  <Company>Smartersoft B.V.</Company>
-	  <PackageReadmeFile>README.md</PackageReadmeFile>
-	  <Copyright>2022</Copyright>
-	  <GenerateDocumentationFile>true</GenerateDocumentationFile>
-	  <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
-	  <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
-	  <RepositoryType>git</RepositoryType>
-	  <PackageProjectUrl>https://github.com/Smartersoft/identity-client-assertion</PackageProjectUrl>
-	  <Description>Using MSAL ConfidentialClientApplicationBuilder with certificate stored in the KeyVault</Description>
-	  <RepositoryUrl>https://github.com/Smartersoft/identity-client-assertion.git</RepositoryUrl>
-	  <PackageTags>MSAL;ConfidentialClientApplicationBuilder;KeyVault;Managed Identity</PackageTags>
+    <Authors>Smartersoft B.V.,Stephan van Rooij</Authors>
+    <Company>Smartersoft B.V.</Company>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <Copyright>2022</Copyright>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
+    <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
+    <RepositoryType>git</RepositoryType>
+    <PackageProjectUrl>https://github.com/Smartersoft/identity-client-assertion</PackageProjectUrl>
+    <Description>Using MSAL ConfidentialClientApplicationBuilder with certificate stored in the KeyVault</Description>
+    <RepositoryUrl>https://github.com/Smartersoft/identity-client-assertion.git</RepositoryUrl>
+    <PackageTags>MSAL;ConfidentialClientApplicationBuilder;KeyVault;Managed Identity</PackageTags>
   </PropertyGroup>
-
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <NoWarn>1701;1702;CS8616</NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <NoWarn>1701;1702;CS8616;CS1591;CS8604</NoWarn>
   </PropertyGroup>
-
-	<ItemGroup>
-		<PackageReference Include="Azure.Identity" Version="1.5.0" />
-		<PackageReference Include="Azure.Security.KeyVault.Certificates" Version="4.2.0" />
-		<PackageReference Include="Azure.Security.KeyVault.Keys" Version="4.2.0" />
-		<PackageReference Include="Microsoft.Identity.Client" Version="4.40.0" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<None Include="..\..\docs\Smartersoft.Identity.Client.Assertion.md" Pack="true" PackagePath="\README.md" />
-		<None Include="..\..\LICENSE.txt" Pack="true" PackagePath="\LICENSE.txt" />
-	</ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Azure.Identity" Version="1.5.0" />
+    <PackageReference Include="Azure.Security.KeyVault.Certificates" Version="4.2.0" />
+    <PackageReference Include="Azure.Security.KeyVault.Keys" Version="4.2.0" />
+    <PackageReference Include="Microsoft.Identity.Client" Version="4.40.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\docs\Smartersoft.Identity.Client.Assertion.md" Pack="true" PackagePath="\README.md" />
+    <None Include="..\..\LICENSE.txt" Pack="true" PackagePath="\LICENSE.txt" />
+  </ItemGroup>
 </Project>

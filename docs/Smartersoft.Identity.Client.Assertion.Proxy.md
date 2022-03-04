@@ -20,7 +20,7 @@ This api is meant to be used during development only! For production check out [
 
 1. Install the proxy with `dotnet tool install --global Smartersoft.Identity.Client.Assertion.Proxy`
 2. Run the proxy with `az-kv-proxy` or `az-kv-proxy --urls http://localhost:5616` if you wish to use another port
-3. Open de browser and go to `http://localhost:5616/swagger/index.html`
+3. Open de browser and go to [/swagger/index.html](http://localhost:5616/swagger/index.html)
 4. Try the endpoints
 
 ### Usage with Insomnia
