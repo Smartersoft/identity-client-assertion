@@ -31,5 +31,5 @@ jobs:
     - name: Build
       run: dotnet build $SOLUTION --configuration $BUILD_CONFIG --no-restore
 
-    - name: Run formatter
-      run: dotnet format $SOLUTION
+    # - name: Run formatter
+    #   run: dotnet format $SOLUTION

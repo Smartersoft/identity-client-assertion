@@ -1,0 +1,49 @@
+name: Build and release az-kv-proxy
+
+on:
+  push:
+    branches:
+    - main
+    - docs-and-ci
+    paths:
+      - .github/workflows/release-proxy.yml
+      - src/Smartersoft.Identity.Client.Assertion/**/*.cs
+      - src/Smartersoft.Identity.Client.Assertion.Proxy/**/*.cs
+    
+jobs:
+  build-and-push:
+
+    env:
+      BUILD_CONFIG: 'Release'
+      SOLUTION: 'Smartersoft.Identity.Client.Assertion.sln'
+      PROXY: 'src/Smartersoft.Identity.Client.Assertion.Proxy/Smartersoft.Identity.Client.Assertion.Proxy.csproj'
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Install GitVersion
+      uses: gittools/actions/gitversion/setup@v0.9.7
+      with:
+        versionSpec: '5.x'
+    
+    - name: Determine Version
+      uses: gittools/actions/gitversion/execute@v0.9.7
+      with:
+        useConfigFile: true
+        configFilePath: GitVersion.yml
+        additionalArguments: /updateprojectfiles
+
+    - uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: '6.0.x'
+
+    - name: Restore dependencies
+      run: dotnet restore $SOLUTION
+
+    - name: Build
+      run: dotnet build $SOLUTION --configuration $BUILD_CONFIG --no-restore
+    
+    - name: Package proxy
+      run: dotnet pack $PROXY -c $BUILD_CONFIG --no-build --no-restore
