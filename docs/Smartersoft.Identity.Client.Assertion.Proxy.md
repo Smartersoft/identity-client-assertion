@@ -139,7 +139,7 @@ This endpoint requires you to generate the certificate in the current user certi
 
 ## License
 
-These packages are [licensed][../LICENSE.txt] under `GPL-3.0`, if you wish to use this software under a different license. Or you feel that this really helped in your commercial application and wish to support us? You can [get in touch](https://smartersoft.nl/#contact) and we can talk terms. We are available as consultants.
+These packages are [licensed](https://github.com/Smartersoft/identity-client-assertion/blob/main/LICENSE.txt) under `GPL-3.0`, if you wish to use this software under a different license. Or you feel that this really helped in your commercial application and wish to support us? You can [get in touch](https://smartersoft.nl/#contact) and we can talk terms. We are available as consultants.
 
 [badge_issues]: https://img.shields.io/github/issues/Smartersoft/identity-client-assertion?style=for-the-badge
 [badge_license]: https://img.shields.io/github/license/Smartersoft/identity-client-assertion?style=for-the-badge
