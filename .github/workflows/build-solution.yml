@@ -21,20 +21,15 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
-    - name: Setup NuGet
-      uses: NuGet/setup-nuget@v1.0.5
-      with:
-        nuget-version: '5.x'
-
-    - name: Restore dependencies
-      run: nuget restore $SOLUTION
-
     - uses: actions/setup-dotnet@v1
       with:
         dotnet-version: '6.0.x'
 
+    - name: Restore dependencies
+      run: dotnet restore $SOLUTION
+
     - name: Build
       run: dotnet build $SOLUTION --configuration $BUILD_CONFIG --no-restore
-    
+
     - name: Run formatter
       run: dotnet format $SOLUTION --no-restore
