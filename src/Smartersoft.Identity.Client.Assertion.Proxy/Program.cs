@@ -1,7 +1,11 @@
 using FluentValidation.AspNetCore;
-using Microsoft.Extensions.Options;
 using System.Reflection;
 using System.Text.Json.Serialization;
+
+var portIndex = Array.IndexOf(args, "--port");
+int port = portIndex > -1 && args.Length > portIndex + 1 && int.TryParse(args[portIndex + 1], out int p) ? p : 5616;
+
+ConsoleStyle.WriteHeader(port);
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -56,4 +60,4 @@ app.UseDefaultFiles();
 app.UseStaticFiles();
 app.MapControllers();
 
-app.Run();
+app.Run($"http://localhost:{port}/");
