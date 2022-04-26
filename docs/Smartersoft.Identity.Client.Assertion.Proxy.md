@@ -122,7 +122,7 @@ This endpoint requires you to generate the certificate in the current user certi
 
 This endpoint requires you to generate the certificate in the current user certificate store, but is at least safer than using a plain password as a secret.
 
-- **URL** `/api/Token/local-certificate`
+- **URL** `/api/Token/computer-certificate`
 - **Method** `POST`
 
 ```json
