@@ -8,6 +8,7 @@ on:
       - .github/workflows/release-proxy.yml
       - src/Smartersoft.Identity.Client.Assertion/**/*.cs
       - src/Smartersoft.Identity.Client.Assertion.Proxy/**/*.cs
+      - src/Smartersoft.Identity.Client.Assertion.Proxy/*.csproj
     
 jobs:
   build-and-push:
