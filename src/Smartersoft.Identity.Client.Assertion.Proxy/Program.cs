@@ -46,6 +46,9 @@ builder.Services.AddSwaggerGen(swagger =>
     swagger.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
 });
 
+builder.Environment.ContentRootPath = Path.GetDirectoryName(System.Diagnostics.Process.GetCurrentProcess().MainModule.FileName);
+builder.Environment.WebRootPath = Path.Combine(builder.Environment.ContentRootPath, "wwwroot");
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
