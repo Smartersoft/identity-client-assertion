@@ -1,8 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>net6.0;netcoreapp3.1</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0</TargetFrameworks>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <Nullable>enable</Nullable>
+	<LangVersion>8.0</LangVersion>
     <Authors>Smartersoft B.V.,Stephan van Rooij</Authors>
     <Company>Smartersoft B.V.</Company>
     <PackageReadmeFile>README.md</PackageReadmeFile>
@@ -23,10 +24,10 @@
     <NoWarn>1701;1702;CS8616;CS1591;CS8604</NoWarn>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Azure.Identity" Version="1.5.0" />
-    <PackageReference Include="Azure.Security.KeyVault.Certificates" Version="4.2.0" />
-    <PackageReference Include="Azure.Security.KeyVault.Keys" Version="4.2.0" />
-    <PackageReference Include="Microsoft.Identity.Client" Version="4.40.0" />
+    <PackageReference Include="Azure.Identity" Version="1.6.0" />
+    <PackageReference Include="Azure.Security.KeyVault.Certificates" Version="4.3.0" />
+    <PackageReference Include="Azure.Security.KeyVault.Keys" Version="4.3.0" />
+    <PackageReference Include="Microsoft.Identity.Client" Version="4.43.1" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\docs\Smartersoft.Identity.Client.Assertion.md" Pack="true" PackagePath="\README.md" />
