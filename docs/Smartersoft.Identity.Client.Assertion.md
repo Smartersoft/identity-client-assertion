@@ -65,7 +65,7 @@ using Smartersoft.Identity.Client.Assertion;
         var app = ConfidentialClientApplicationBuilder
             .Create(clientId)
             .WithAuthority(AzureCloudInstance.AzurePublic, tenantId)
-            .WithKeyVaultCertificate(tenantId, clientId, new Uri(KeyVaultUri), certificateName, tokenCredential)
+            .WithKeyVaultCertificate(new Uri(KeyVaultUri), certificateName, tokenCredential)
             .Build();
 
         // Use the app, just like before
@@ -113,7 +113,7 @@ It can be loaded only once and saved in a config file to reduce the calls to the
         var app = ConfidentialClientApplicationBuilder
             .Create(clientId)
             .WithAuthority(AzureCloudInstance.AzurePublic, tenantId)
-            .WithKeyVaultKey(tenantId, clientId, keyId, kid, tokenCredential)
+            .WithKeyVaultKey(keyId, kid, tokenCredential)
             .Build();
 
         // Use the app, just like before
