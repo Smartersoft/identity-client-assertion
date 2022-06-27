@@ -47,7 +47,7 @@ namespace Smartersoft.Identity.Client.Assertion.Proxy.Controllers
             var app = ConfidentialClientApplicationBuilder
                 .Create(tokenRequest.ClientId)
                 .WithAuthority(AzureCloudInstance.AzurePublic, tokenRequest.TenantId)
-                .WithKeyVaultKey(tokenRequest.TenantId, tokenRequest.ClientId, tokenRequest.KeyUri, tokenRequest.KeyThumbprint, GetTokenCredential())
+                .WithKeyVaultKey(tokenRequest.KeyUri, tokenRequest.KeyThumbprint, GetTokenCredential())
                 .Build();
 
             var authResult = await app
@@ -86,7 +86,7 @@ namespace Smartersoft.Identity.Client.Assertion.Proxy.Controllers
             var app = ConfidentialClientApplicationBuilder
                 .Create(tokenRequest.ClientId)
                 .WithAuthority(AzureCloudInstance.AzurePublic, tokenRequest.TenantId)
-                .WithKeyVaultCertificate(tokenRequest.TenantId, tokenRequest.ClientId, tokenRequest.KeyVaultUri, tokenRequest.CertificateName, GetTokenCredential())
+                .WithKeyVaultCertificate(tokenRequest.KeyVaultUri, tokenRequest.CertificateName, GetTokenCredential())
                 .Build();
 
             var authResult = await app

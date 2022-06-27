@@ -69,6 +69,8 @@ namespace Smartersoft.Identity.Client.Assertion
         /// <param name="clientId">Client ID of the calling application</param>
         /// <param name="lifetime">optional lifetime</param>
         /// <returns></returns>
+        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+        [Obsolete("Use version with audience")]
         public static IDictionary<string, object> GenerateClaimsForTenant(string tenantId, string clientId, int lifetime = 300)
         {
             string aud = $"https://login.microsoftonline.com/{tenantId}/v2.0";
@@ -113,6 +115,8 @@ namespace Smartersoft.Identity.Client.Assertion
         /// <param name="tenantId">Tenant ID for which this token will be used</param>
         /// <param name="clientId">Client ID of the calling application</param>
         /// <returns></returns>
+        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+        [Obsolete("Use version with audience")]
         public static string GetUnsignedToken(string kid, string tenantId, string clientId)
         {
             return GetUnsignedToken(kid, GenerateClaimsForTenant(tenantId, clientId));
@@ -174,9 +178,27 @@ namespace Smartersoft.Identity.Client.Assertion
         /// <param name="cancellationToken">Use cancellation token if preferred</param>
         /// <remarks>Needs Key => Sign permission, the client assertion is signed in the KeyVault</remarks>
         /// <returns>Signed client assertion</returns>
+        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+        [Obsolete("Use version with audience")]
         public static Task<string> GetSignedTokenWithKeyVaultKey(string tenantId, string clientId, Uri keyId, string kid, TokenCredential tokenCredential, CancellationToken cancellationToken = default)
         {
             return GetSignedTokenWithKeyVaultKey(GenerateClaimsForTenant(tenantId, clientId), keyId, kid, tokenCredential, cancellationToken);
+        }
+
+        /// <summary>
+        /// Create a signed client assertion with a Key in the KeyVault
+        /// </summary>
+        /// <param name="keyId">KeyId, Uri of the actual key in the KeyVault</param>
+        /// <param name="kid">The Base64Url encoded hash of the certificate, use GetCertificateInfoFromKeyVault</param>
+        /// <param name="audience">audience to use in the assertion</param>
+        /// <param name="clientId">Client Identifier</param>
+        /// <param name="tokenCredential">Use any TokenCredential (eg. new DefaultTokenCredential())</param>
+        /// <param name="cancellationToken">Use cancellation token if preferred</param>
+        /// <remarks>Needs Key => Sign permission, the client assertion is signed in the KeyVault</remarks>
+        /// <returns>Signed client assertion</returns>
+        public static Task<string> GetSignedTokenWithKeyVaultKey(Uri keyId, string kid, string audience, string clientId, TokenCredential tokenCredential, CancellationToken cancellationToken = default)
+        {
+            return GetSignedTokenWithKeyVaultKey(GenerateClaimsForAudience(audience, clientId), keyId, kid, tokenCredential, cancellationToken);
         }
 
         /// <summary>
@@ -239,9 +261,28 @@ namespace Smartersoft.Identity.Client.Assertion
         /// <param name="cancellationToken">Use cancellation token if preferred</param>
         /// <returns>Signed client assertion</returns>
         /// <remarks>`GetSignedTokenWithKeyVaultKey` is perferred over this method</remarks>
+        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+        [Obsolete("Use version with audience")]
         public static Task<string> GetSignedTokenWithKeyVaultCertificate(string tenantId, string clientId, Uri vaultUri, string certificateName, TokenCredential tokenCredential, CancellationToken cancellationToken = default)
         {
             return GetSignedTokenWithKeyVaultCertificate(GenerateClaimsForTenant(tenantId, clientId), vaultUri, certificateName, tokenCredential, cancellationToken);
+        }
+
+        /// <summary>
+        /// Fetches information about the certificate (should be cached!), and then signs a token with the info from the KeyVault
+        /// </summary>
+
+        /// <param name="vaultUri">Uri of the KeyVault</param>
+        /// <param name="certificateName">Name of certificate</param>
+        /// <param name="audience">Assertion audience</param>
+        /// <param name="clientId">Client Identifier</param>
+        /// <param name="tokenCredential">Use any TokenCredential (eg. new DefaultTokenCredential())</param>
+        /// <param name="cancellationToken">Use cancellation token if preferred</param>
+        /// <returns>Signed client assertion</returns>
+        /// <remarks>`GetSignedTokenWithKeyVaultKey` is perferred over this method</remarks>
+        public static Task<string> GetSignedTokenWithKeyVaultCertificate(Uri vaultUri, string certificateName, string audience, string clientId, TokenCredential tokenCredential, CancellationToken cancellationToken = default)
+        {
+            return GetSignedTokenWithKeyVaultCertificate(GenerateClaimsForAudience(audience, clientId), vaultUri, certificateName, tokenCredential, cancellationToken);
         }
     }
 }
