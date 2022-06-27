@@ -70,7 +70,6 @@ namespace Smartersoft.Identity.Client.Assertion
         /// <param name="lifetime">optional lifetime</param>
         /// <returns></returns>
         [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
-        [Obsolete("Use version with audience")]
         public static IDictionary<string, object> GenerateClaimsForTenant(string tenantId, string clientId, int lifetime = 300)
         {
             string aud = $"https://login.microsoftonline.com/{tenantId}/v2.0";
@@ -116,7 +115,6 @@ namespace Smartersoft.Identity.Client.Assertion
         /// <param name="clientId">Client ID of the calling application</param>
         /// <returns></returns>
         [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
-        [Obsolete("Use version with audience")]
         public static string GetUnsignedToken(string kid, string tenantId, string clientId)
         {
             return GetUnsignedToken(kid, GenerateClaimsForTenant(tenantId, clientId));
