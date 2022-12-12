@@ -2,8 +2,6 @@
 using Azure.Identity;
 using Microsoft.Identity.Client;
 using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading;
 
 namespace Smartersoft.Identity.Client.Assertion
@@ -90,7 +88,6 @@ namespace Smartersoft.Identity.Client.Assertion
             return applicationBuilder.WithKeyVaultKey(tenantId, clientId, keyVaultKeyId, kid, new DefaultAzureCredential());
         }
 
-
         /// <summary>
         /// Add a client assertion, while they key stays in the KeyVault
         /// </summary>
@@ -136,6 +133,32 @@ namespace Smartersoft.Identity.Client.Assertion
                 .WithClientAssertion((AssertionRequestOptions options) =>
                     ClientAssertionGenerator.GetSignedTokenWithKeyVaultKey(keyVaultKeyId, kid, options.TokenEndpoint, options.ClientID, tokenCredential, cancellationToken: options.CancellationToken)
                 );
+        }
+
+        /// <summary>
+        /// Add a client assertion using a Managed Identity, configured as Federated Credential.
+        /// </summary>
+        /// <param name="applicationBuilder">ConfidentialClientApplicationBuilder</param>
+        /// <param name="managedIdentityScope">The scope used for the federated credential api</param>
+        /// <see href="https://svrooij.io/2022/06/21/managed-identity-multi-tenant-app/">Blog post</see>
+        /// <remarks>This is experimental, since federated credentials are still in preview.</remarks>
+        public static ConfidentialClientApplicationBuilder WithManagedIdentity(this ConfidentialClientApplicationBuilder applicationBuilder, string managedIdentityScope) => applicationBuilder.WithManagedIdentity(managedIdentityScope, new ManagedIdentityCredential());
+
+        /// <summary>
+        /// Add a client assertion using a Managed Identity, configured as Federated Credential.
+        /// </summary>
+        /// <param name="applicationBuilder">ConfidentialClientApplicationBuilder</param>
+        /// <param name="managedIdentityScope">The scope used for the federated credential api, eg. `{app-uri}/.default`</param>
+        /// <param name="managedIdentityCredential">Use any TokenCredential (eg. new ManagedIdentityCredential())</param>
+        /// <see href="https://svrooij.io/2022/06/21/managed-identity-multi-tenant-app/">Blog post</see>
+        /// <remarks>This is experimental, since federated credentials are still in preview.</remarks>
+        public static ConfidentialClientApplicationBuilder WithManagedIdentity(this ConfidentialClientApplicationBuilder applicationBuilder, string managedIdentityScope, TokenCredential managedIdentityCredential)
+        {
+            return applicationBuilder.WithClientAssertion(async (AssertionRequestOptions options) =>
+            {
+                var tokenResult = await managedIdentityCredential.GetTokenAsync(new TokenRequestContext(new[] { managedIdentityScope }), options.CancellationToken);
+                return tokenResult.Token;
+            });
         }
     }
 }

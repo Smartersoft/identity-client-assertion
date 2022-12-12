@@ -24,10 +24,10 @@
     <NoWarn>1701;1702;CS8616;CS1591;CS8604</NoWarn>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Azure.Identity" Version="1.6.0" />
-    <PackageReference Include="Azure.Security.KeyVault.Certificates" Version="4.3.0" />
-    <PackageReference Include="Azure.Security.KeyVault.Keys" Version="4.3.0" />
-    <PackageReference Include="Microsoft.Identity.Client" Version="4.45.0" />
+    <PackageReference Include="Azure.Identity" Version="1.8.0" />
+    <PackageReference Include="Azure.Security.KeyVault.Certificates" Version="4.4.0" />
+    <PackageReference Include="Azure.Security.KeyVault.Keys" Version="4.4.0" />
+    <PackageReference Include="Microsoft.Identity.Client" Version="4.48.1" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\docs\Smartersoft.Identity.Client.Assertion.md" Pack="true" PackagePath="\README.md" />

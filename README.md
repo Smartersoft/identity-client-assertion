@@ -21,7 +21,7 @@ This library is created by [Smartersoft B.V.](https://smartersoft.nl) and [licen
 [![GitHub issues][badge_issues]][link_issues]
 [![GitHub Sponsors][badge_sponsor]][link_sponsor]
 
-[Smartersoft.Identity.Client.Assertion.Proxy](docs/Smartersoft.Identity.Client.Assertion.Proxy.md) is a small api you can run on your local machine to use certificates stored in the KeyVault to secure your client credentials during development.
+[Smartersoft.Identity.Client.Assertion.Proxy](docs/Smartersoft.Identity.Client.Assertion.Proxy.md) is a small api you can run on your local machine to use certificates stored in the KeyVault (or local certificate store) to secure your client credentials during development.
 
 ## License
 

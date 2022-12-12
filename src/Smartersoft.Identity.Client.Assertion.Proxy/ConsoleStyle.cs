@@ -1,7 +1,7 @@
 ﻿
 using System.Reflection;
 
-public static class ConsoleStyle
+internal static class ConsoleStyle
 {
     private const string Header = @"
  _______  _______        _                        _______  _______  _______                   
