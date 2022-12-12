@@ -137,5 +137,29 @@ namespace Smartersoft.Identity.Client.Assertion
                     ClientAssertionGenerator.GetSignedTokenWithKeyVaultKey(keyVaultKeyId, kid, options.TokenEndpoint, options.ClientID, tokenCredential, cancellationToken: options.CancellationToken)
                 );
         }
+
+        /// <summary>
+        /// Add a client assertion using a Managed Identity, configured as Federated Credential.
+        /// </summary>
+        /// <param name="applicationBuilder">ConfidentialClientApplicationBuilder</param>
+        /// <param name="managedIdentityScope">The scope used for the federated credential api</param>
+        /// <remarks>Check this post for more details: https://svrooij.io/2022/06/21/managed-identity-multi-tenant-app/</remarks>
+        public static ConfidentialClientApplicationBuilder WithManagedIdentity(this ConfidentialClientApplicationBuilder applicationBuilder, string managedIdentityScope) => applicationBuilder.WithManagedIdentity(managedIdentityScope, new ManagedIdentityCredential());
+
+        /// <summary>
+        /// Add a client assertion using a Managed Identity, configured as Federated Credential.
+        /// </summary>
+        /// <param name="applicationBuilder">ConfidentialClientApplicationBuilder</param>
+        /// <param name="managedIdentityScope">The scope used for the federated credential api, eg. `{app-uri}/.default`</param>
+        /// <param name="managedIdentityCredential">Use any TokenCredential (eg. new ManagedIdentityCredential())</param>
+        /// <remarks>Check this post for more details: https://svrooij.io/2022/06/21/managed-identity-multi-tenant-app/</remarks>
+        public static ConfidentialClientApplicationBuilder WithManagedIdentity(this ConfidentialClientApplicationBuilder applicationBuilder, string managedIdentityScope, TokenCredential managedIdentityCredential)
+        {
+            return applicationBuilder.WithClientAssertion(async (AssertionRequestOptions options) =>
+            {
+                var tokenResult = await managedIdentityCredential.GetTokenAsync(new TokenRequestContext(new[] { managedIdentityScope }), options.CancellationToken);
+                return tokenResult.Token;
+            });
+        }
     }
 }
