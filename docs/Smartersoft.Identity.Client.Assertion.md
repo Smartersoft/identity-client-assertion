@@ -151,3 +151,7 @@ Off course this solution still needs a secure way to access the Key Vault, like 
 ## License
 
 These packages are [licensed](https://github.com/Smartersoft/identity-client-assertion/blob/main/LICENSE.txt) under `GPL-3.0`, if you wish to use this software under a different license. Or you feel that this really helped in your commercial application and wish to support us? You can [get in touch](https://smartersoft.nl/#contact) and we can talk terms. We are available as consultants.
+
+## Open-source
+
+This package is open-source for a reason. It's developed by [Stephan van Rooij](https://svrooij.io/), I'm a talented software architect, but people make mistakes. Always check out what's doing and make sure it doesn't do anything strange with the tokens. And that I didn't make any rudimentary mistakes. 
