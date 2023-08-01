@@ -137,6 +137,45 @@ This endpoint requires you to generate the certificate in the current user certi
 }
 ```
 
+## Mananged Identity Credential Emulator
+
+This api has a special endpoint to emulate the Managed Identity Credentials endpoint, (as used by the CloudShell). This is useful for local development and testing.
+If you want to know how the ManagedIdentityCredential works, check out [this blog post](https://svrooij.io/2021/07/20/managed-identity-without-azure/#managedidentitycredential-explained).
+
+For now you just have to know how to set it up:
+
+1. Start the proxy
+2. Pick your endpoint
+3. Set the `MSI_ENDPOINT` environment variable to one of the MSI endpoints (see below).
+   You can do this either in de debug settings of your IDE, in your user profile or in the launchSettings.json in the project.
+4. Start your app and use `ManagedIdentityCredential` to get your tokens, as if you were running in the cloud.
+
+Setting the `MSI_ENDPOINT` environment variable tricks the `ManagedIdentityCredential` into thinking it's running as it would in the CloudShell.
+Specifically, it will trick the [ManagedIdentitySource](https://github.com/Azure/azure-sdk-for-net/blob/13bc415e43a92354af7019063718d54f10488c7e/sdk/identity/Azure.Identity/src/ManagedIdentityClient.cs#L80-L90),
+to pick the [CloudShellManagedIdentitySource](https://github.com/Azure/azure-sdk-for-net/blob/13bc415e43a92354af7019063718d54f10488c7e/sdk/identity/Azure.Identity/src/CloudShellManagedIdentitySource.cs),
+which happens to only need a `MSI_ENDPOINT` to work. 
+
+
+
+### MSI - Forward
+
+MSI Endpoint: `http://localhost:5616/api/msi/forward`
+
+Your request is forwarded to the Microsoft Token Endpoint using DefaultAzureCredential, this might be useful in a situation where you want to test your app using MSI inside a docker container.
+If you want to use this in docker, make sure the docker container can reach the host machine on port 5616 and set the `MSI_ENDPOINT` to `http://host.docker.internal:5616/api/msi/forward`.
+
+### MSI - Local certificate
+
+MSI Endpoint: `http://localhost:5616/api/msi/{tenant}/{clientId}/{machinecert_or_usercert}/{thumbprint}`
+
+Do a token request with a pre-registered application and a certificate in the local machine certificate store or the current user certificate store.
+
+### MSI - Key Vault certificate
+
+MSI Endpoint: `http://localhost:5616/api/msi/{tenant}/{clientId}/kv/{keyvaultSubdomain}/{certificateName}`
+
+Do a token request with a pre-registered application and a certificate in the Key Vault, this uses signing inside the keyvault, the private key of the certificate is not downloaded! You should generate it inside the KeyVault and mark it as not exportable. See (#using-key-vault-certificate) for more info.
+
 ## License
 
 These packages are [licensed](https://github.com/Smartersoft/identity-client-assertion/blob/main/LICENSE.txt) under `GPL-3.0`, if you wish to use this software under a different license. Or you feel that this really helped in your commercial application and wish to support us? You can [get in touch](https://smartersoft.nl/#contact) and we can talk terms. We are available as consultants.

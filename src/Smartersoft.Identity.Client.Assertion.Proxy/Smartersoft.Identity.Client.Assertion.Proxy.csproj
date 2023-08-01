@@ -12,7 +12,7 @@
     <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
     <RepositoryType>git</RepositoryType>
     <PackageProjectUrl>https://github.com/Smartersoft/identity-client-assertion</PackageProjectUrl>
-    <Description>Token endpoints using certificates, to be used during development to don't expose certificates on dev machines</Description>
+    <Description>Token endpoints using certificates, to be used during development to not expose certificates on dev machines</Description>
     <RepositoryUrl>https://github.com/Smartersoft/identity-client-assertion.git</RepositoryUrl>
     <PackageTags>Managed Identity;Postman;Insomnia</PackageTags>
     <PackAsTool>true</PackAsTool>

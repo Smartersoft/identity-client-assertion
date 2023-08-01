@@ -25,7 +25,7 @@ namespace Smartersoft.Identity.Client.Assertion.Proxy.Controllers
             _logger = logger;
         }
 
-        private TokenCredential GetTokenCredential() {
+        internal static TokenCredential GetTokenCredential() {
             return new DefaultAzureCredential(new DefaultAzureCredentialOptions {
                 ExcludeEnvironmentCredential = true, // Don't use environment variables (even interactive is better)
                 ExcludeInteractiveBrowserCredential = false,
