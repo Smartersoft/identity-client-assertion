@@ -32,7 +32,7 @@ namespace Smartersoft.Identity.Client.Assertion.Proxy.Models
                 .NotEqual("string");
             RuleFor(r => r.KeyVaultUri)
                 .NotEmpty()
-                .Must(v => v.IsAbsoluteUri)
+                .Must(v => v?.IsAbsoluteUri == true)
                 .WithMessage("Only absolute Uris permitted");
         }
     }

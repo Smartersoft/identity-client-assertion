@@ -1,4 +1,5 @@
 ﻿using FluentValidation;
+using System.ComponentModel.DataAnnotations;
 using System.Security.Cryptography.X509Certificates;
 namespace Smartersoft.Identity.Client.Assertion.Proxy.Models
 {
@@ -14,7 +15,8 @@ namespace Smartersoft.Identity.Client.Assertion.Proxy.Models
         /// <summary>
         /// With what value do you wish to search for the certificate?
         /// </summary>
-        public object? FindValue { get; set; }
+        [Required]
+        public required object FindValue { get; set; }
     }
 
     /// <summary>

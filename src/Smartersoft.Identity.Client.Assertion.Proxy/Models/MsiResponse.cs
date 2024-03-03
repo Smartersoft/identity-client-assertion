@@ -2,25 +2,53 @@
 
 namespace Smartersoft.Identity.Client.Assertion.Proxy.Models
 {
+    /// <summary>
+    /// MsiResponse that apparantly all managed identity endpoints return
+    /// </summary>
     public record MsiResponse
     {
+        /// <summary>
+        /// Access token for the resource
+        /// </summary>
         [JsonPropertyName("access_token")]
+        public required string AccessToken { get; init; }
 
-        public string AccessToken { get; init; }
+        /// <summary>
+        /// Refresh token
+        /// </summary>
         [JsonPropertyName("refresh_token")]
+        public string? RefreshToken { get; init; } = string.Empty;
 
-        public string RefreshToken { get; init; } = string.Empty;
+        /// <summary>
+        /// Time in seconds until the token expires
+        /// </summary>
         [JsonPropertyName("expires_in")]
+        public required int ExpiresIn { get; init; }
 
-        public int ExpiresIn { get; init; }
+        /// <summary>
+        /// Unix timestamp when the token expires
+        /// </summary>
         [JsonPropertyName("expires_on")]
 
-        public int ExpiresOn { get; init; }
+        public required int ExpiresOn { get; init; }
+
+        /// <summary>
+        /// Unix timestamp when the token is valid from
+        /// </summary>
         [JsonPropertyName("not_before")]
 
-        public int NotBefore { get; init; }
+        public required int NotBefore { get; init; }
+
+        /// <summary>
+        /// Resource for which the token is valid
+        /// </summary>
         [JsonPropertyName("resource")]
-        public string Resource { get; init; }
+        public required string Resource { get; init; }
+
+        /// <summary>
+        /// Token type
+        /// </summary>
+        /// <remarks>Will always return `Bearer`?</remarks>
         [JsonPropertyName("token_type")]
         public string TokenType { get; init; } = "Bearer";
 

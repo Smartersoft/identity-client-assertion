@@ -1,3 +1,6 @@
+using Azure.Core;
+using Azure.Identity;
+using FluentValidation;
 using FluentValidation.AspNetCore;
 using System.Reflection;
 using System.Text.Json.Serialization;
@@ -13,17 +16,27 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddMemoryCache();
 
+builder.Services.AddSingleton<TokenCredential>(new DefaultAzureCredential(
+    new DefaultAzureCredentialOptions
+        {
+            ExcludeEnvironmentCredential = true, // Don't use environment variables (even interactive is better)
+            ExcludeInteractiveBrowserCredential = false,
+            ExcludeManagedIdentityCredential = true, // Don't run this api in production!
+        }
+    ));
+
 builder.Services.AddControllers()
     .AddJsonOptions(x =>
     {
         // serialize enums as strings in api responses (e.g. Role)
         x.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
-    })
-    .AddFluentValidation(options =>
-    {
-        options.DisableDataAnnotationsValidation = true;
-        options.RegisterValidatorsFromAssemblyContaining<Smartersoft.Identity.Client.Assertion.Proxy.Models.TokenRequest>();
     });
+
+builder.Services
+    .AddValidatorsFromAssemblyContaining<Smartersoft.Identity.Client.Assertion.Proxy.Models.TokenRequest>()
+    .AddFluentValidationAutoValidation()
+    .AddFluentValidationClientsideAdapters();
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(swagger =>
@@ -48,8 +61,8 @@ builder.Services.AddSwaggerGen(swagger =>
     swagger.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
 });
 
-builder.Environment.ContentRootPath = Path.GetDirectoryName(System.Diagnostics.Process.GetCurrentProcess().MainModule.FileName);
-builder.Environment.WebRootPath = Path.Combine(builder.Environment.ContentRootPath, "wwwroot");
+builder.Environment.ContentRootPath = Path.GetDirectoryName(System.Diagnostics.Process.GetCurrentProcess().MainModule!.FileName)!;
+builder.Environment.WebRootPath = Path.Combine(builder.Environment.ContentRootPath!, "wwwroot");
 
 var app = builder.Build();
 
