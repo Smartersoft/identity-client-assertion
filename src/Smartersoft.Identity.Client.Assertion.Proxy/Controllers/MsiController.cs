@@ -1,4 +1,5 @@
-﻿using Azure.Identity;
+﻿using Azure.Core;
+using Azure.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Identity.Client;
@@ -15,24 +16,32 @@ namespace Smartersoft.Identity.Client.Assertion.Proxy.Controllers
     {
         private readonly ILogger<MsiController> _logger;
         private readonly IMemoryCache? _cache;
-
-        public MsiController(ILogger<MsiController> logger, IMemoryCache? cache)
+        private readonly TokenCredential _tokenCredential;
+        /// <summary>
+        /// Main constructor
+        /// </summary>
+        /// <param name="logger"></param>
+        /// <param name="tokenCredential"></param>
+        /// <param name="cache"></param>
+        public MsiController(ILogger<MsiController> logger, TokenCredential tokenCredential,IMemoryCache? cache = null)
         {
             _logger = logger;
             _cache = cache;
+            _tokenCredential = tokenCredential;
         }
 
         /// <summary>
         /// Forward the call to the Microsoft Token Service using DefaultAzureCredential
         /// </summary>
         /// <param name="msiRequest">MSI request as if this would come from CloudShell</param>
+        /// <param name="cancellationToken"></param>
         [HttpPost("forward")]
         [ProducesResponseType(typeof(Models.MsiResponse), 200)]
         public async Task<IActionResult> Forward([FromForm] Models.MsiRequest msiRequest, CancellationToken cancellationToken = default)
         {
             _logger.LogInformation("MSI request for {resource}", msiRequest.Resource);
-            var credential = new DefaultAzureCredential();
-            var tokenResult = await credential.GetTokenAsync(new Azure.Core.TokenRequestContext(new[] { msiRequest.Resource }), cancellationToken);
+            
+            var tokenResult = await _tokenCredential.GetTokenAsync(new Azure.Core.TokenRequestContext(new[] { FixResourceUrl(msiRequest.Resource) }), cancellationToken);
 
             return Ok(Models.MsiResponse.FromAzureAccessToken(tokenResult, msiRequest.Resource));
         }
@@ -42,14 +51,14 @@ namespace Smartersoft.Identity.Client.Assertion.Proxy.Controllers
         /// </summary>
         /// <param name="tenant">Pre-set the tenant so other tenants are skipped when setting the token</param>
         /// <param name="msiRequest">MSI request as if this would come from CloudShell</param>
+        /// <param name="cancellationToken"></param>
         [HttpPost("{tenant}/forward")]
         [ProducesResponseType(typeof(Models.MsiResponse), 200)]
         public async Task<IActionResult> TenantForward([FromRoute] string tenant, [FromForm] Models.MsiRequest msiRequest, CancellationToken cancellationToken = default)
         {
             _logger.LogInformation("MSI request for {resource}", msiRequest.Resource);
 
-            var credential = new DefaultAzureCredential();
-            var tokenResult = await credential.GetTokenAsync(new Azure.Core.TokenRequestContext(new[] { msiRequest.Resource }, tenantId: tenant), cancellationToken);
+            var tokenResult = await _tokenCredential.GetTokenAsync(new Azure.Core.TokenRequestContext(new[] { FixResourceUrl(msiRequest.Resource) }, tenantId: tenant), cancellationToken);
 
             return Ok(Models.MsiResponse.FromAzureAccessToken(tokenResult, msiRequest.Resource));
         }
@@ -61,6 +70,7 @@ namespace Smartersoft.Identity.Client.Assertion.Proxy.Controllers
         /// <param name="clientId">Client ID (Application ID)</param>
         /// <param name="thumbprint">Certificate Thumbprint</param>
         /// <param name="msiRequest">MSI request as if this would come from CloudShell</param>
+        /// <param name="cancellationToken"></param>
         [HttpPost("{tenant}/{clientId}/usercert/{thumbprint}")]
         [ProducesResponseType(typeof(Models.MsiResponse), 200)]
         [ProducesResponseType(404)]
@@ -78,6 +88,7 @@ namespace Smartersoft.Identity.Client.Assertion.Proxy.Controllers
         /// <param name="clientId">Client ID (Application ID)</param>
         /// <param name="thumbprint">Certificate Thumbprint</param>
         /// <param name="msiRequest">MSI request as if this would come from CloudShell</param>
+        /// <param name="cancellationToken"></param>
         [HttpPost("{tenant}/{clientId}/machinecert/{thumbprint}")]
         [ProducesResponseType(typeof(Models.MsiResponse), 200)]
         [ProducesResponseType(404)]
@@ -106,7 +117,7 @@ namespace Smartersoft.Identity.Client.Assertion.Proxy.Controllers
                 .WithCertificate(cert)
                 .Build();
             
-            var authResult = await app.AcquireTokenForClient(new[] { msiRequest.Resource }).ExecuteAsync(cancellationToken);
+            var authResult = await app.AcquireTokenForClient(new[] { FixResourceUrl(msiRequest.Resource) }).ExecuteAsync(cancellationToken);
 
             return Ok(Models.MsiResponse.FromAuthenticationResult(authResult, msiRequest.Resource));
         }
@@ -119,6 +130,7 @@ namespace Smartersoft.Identity.Client.Assertion.Proxy.Controllers
         /// <param name="subdomain">KeyVault subdomain</param>
         /// <param name="certificateName">Certificate name of certificate in KeyVault</param>
         /// <param name="msiRequest">MSI request as if this would come from CloudShell</param>
+        /// <param name="cancellationToken"></param>
         [HttpPost("{tenant}/{clientId}/kv/{subdomain}/{certificateName}")]
         [ProducesResponseType(typeof(Models.MsiResponse), 200)]
         public async Task<IActionResult> KeyVault(
@@ -140,10 +152,10 @@ namespace Smartersoft.Identity.Client.Assertion.Proxy.Controllers
             var app = ConfidentialClientApplicationBuilder
                 .Create(clientId)
                 .WithAuthority(AzureCloudInstance.AzurePublic, tenant)
-                .WithKeyVaultKey(certInfo.KeyId!, certInfo.Kid!, TokenController.GetTokenCredential())
+                .WithKeyVaultKey(certInfo.KeyId!, certInfo.Kid!, _tokenCredential)
                 .Build();
 
-            var authResult = await app.AcquireTokenForClient(new[] { msiRequest.Resource }).ExecuteAsync(cancellationToken);
+            var authResult = await app.AcquireTokenForClient(new[] { FixResourceUrl(msiRequest.Resource) }).ExecuteAsync(cancellationToken);
 
             return Ok(Models.MsiResponse.FromAuthenticationResult(authResult, msiRequest.Resource));
         }
@@ -155,16 +167,29 @@ namespace Smartersoft.Identity.Client.Assertion.Proxy.Controllers
                 return _cache.GetOrCreateAsync($"cert-info-{subdomain}-{certificateName}", async entry =>
                 {
                     entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5);
-                    return await ClientAssertionGenerator.GetCertificateInfoFromKeyVault(GenerateKeyVaultUri(subdomain), certificateName, TokenController.GetTokenCredential(), cancellationToken);
+                    return await ClientAssertionGenerator.GetCertificateInfoFromKeyVault(GenerateKeyVaultUri(subdomain), certificateName, _tokenCredential, cancellationToken);
                 })!;
             }
 
-            return ClientAssertionGenerator.GetCertificateInfoFromKeyVault(GenerateKeyVaultUri(subdomain), certificateName, TokenController.GetTokenCredential(), cancellationToken);
+            return ClientAssertionGenerator.GetCertificateInfoFromKeyVault(GenerateKeyVaultUri(subdomain), certificateName, _tokenCredential, cancellationToken);
         }
 
         private Uri GenerateKeyVaultUri(string subdomain)
         {
             return new Uri($"https://{subdomain}.vault.azure.net/");
+        }
+
+        private static string FixResourceUrl(string resource)
+        {
+            if (resource.EndsWith("/.default"))
+            {
+                return resource;
+            }
+            if (resource.EndsWith("/"))
+            {
+                return resource + ".default";
+            }
+            return resource + "/.default";
         }
     }
 }

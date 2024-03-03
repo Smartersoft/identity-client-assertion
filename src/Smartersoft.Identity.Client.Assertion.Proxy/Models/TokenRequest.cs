@@ -42,7 +42,7 @@ namespace Smartersoft.Identity.Client.Assertion.Proxy.Models
                 .WithMessage("'{PropertyName}' must be a guid.");
             RuleFor(r => r.Scopes)
                 .NotEmpty()
-                .Must(v => !v.Any(s => s == "string"))
+                .Must(v => !v!.Any(s => s == "string"))
                 .WithMessage("'string' is not a valid scope.");
         }
     }

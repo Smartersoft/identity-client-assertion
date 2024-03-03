@@ -18,6 +18,8 @@ This api is meant to be used during development only! For production check out [
 
 ## Using this proxy
 
+This proxy requires you to have `.NET 8` installed, and the `dotnet` command available in your terminal, make sure you install that beforehand.
+
 1. Install the proxy with `dotnet tool install --global Smartersoft.Identity.Client.Assertion.Proxy`
 2. Run the proxy with `az-kv-proxy` or `az-kv-proxy --urls http://localhost:5616` if you wish to use another port
 3. Open de browser and go to [/swagger/index.html](http://localhost:5616/swagger/index.html)
@@ -153,9 +155,9 @@ For now you just have to know how to set it up:
 Setting the `MSI_ENDPOINT` environment variable tricks the `ManagedIdentityCredential` into thinking it's running as it would in the CloudShell.
 Specifically, it will trick the [ManagedIdentitySource](https://github.com/Azure/azure-sdk-for-net/blob/13bc415e43a92354af7019063718d54f10488c7e/sdk/identity/Azure.Identity/src/ManagedIdentityClient.cs#L80-L90),
 to pick the [CloudShellManagedIdentitySource](https://github.com/Azure/azure-sdk-for-net/blob/13bc415e43a92354af7019063718d54f10488c7e/sdk/identity/Azure.Identity/src/CloudShellManagedIdentitySource.cs),
-which happens to only need a `MSI_ENDPOINT` to work. 
+which happens to only need a `MSI_ENDPOINT` to work.
 
-
+More details on how you would use this in docker, check out [this blog post](https://svrooij.io/2023/08/03/emulate-managed-identities/).
 
 ### MSI - Forward
 
@@ -183,14 +185,12 @@ These packages are [licensed](https://github.com/Smartersoft/identity-client-ass
 [badge_issues]: https://img.shields.io/github/issues/Smartersoft/identity-client-assertion?style=for-the-badge
 [badge_license]: https://img.shields.io/github/license/Smartersoft/identity-client-assertion?style=for-the-badge
 [badge_nuget_proxy]: https://img.shields.io/nuget/v/Smartersoft.Identity.Client.Assertion.Proxy?logoColor=00a880&style=for-the-badge
-[badge_nuget]: https://img.shields.io/nuget/v/Smartersoft.Identity.Client.Assertion?logoColor=00a880&style=for-the-badge
 [badge_source]: https://img.shields.io/badge/Source-Github-green?style=for-the-badge
 [badge_sponsor]: https://img.shields.io/github/sponsors/svrooij?label=Github%20Sponsors&style=for-the-badge
 
 [link_issues]: https://github.com/Smartersoft/identity-client-assertion/issues
 [link_license]: https://github.com/Smartersoft/identity-client-assertion/blob/main/LICENSE.txt
 [link_nuget_proxy]: https://www.nuget.org/packages/Smartersoft.Identity.Client.Assertion.Proxy/
-[link_nuget]: https://www.nuget.org/packages/Smartersoft.Identity.Client.Assertion/
 [link_source]: https://github.com/Smartersoft/identity-client-assertion/
 [link_sponsor]: https://github.com/sponsors/svrooij/
 [link_twitch]: https://www.twitch.tv/videos/1414084395
