@@ -19,6 +19,7 @@ builder.Services.AddMemoryCache();
 builder.Services.AddSingleton<TokenCredential>(new DefaultAzureCredential(
     new DefaultAzureCredentialOptions
         {
+            AdditionallyAllowedTenants = {"*"}, // Allow all tenants
             ExcludeEnvironmentCredential = true, // Don't use environment variables (even interactive is better)
             ExcludeInteractiveBrowserCredential = false,
             ExcludeManagedIdentityCredential = true, // Don't run this api in production!
