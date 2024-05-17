@@ -13,13 +13,20 @@ namespace Smartersoft.Identity.Client.Assertion
         /// Name of the certificate
         /// </summary>
         public string? CertificateName { get; set; }
+
         /// <summary>
         /// Base64Url encoded hash of certificate, used in the client assertion
         /// </summary>
         public string? Kid { get; set; }
+
         /// <summary>
         /// KeyId of the private key, used for signing.
         /// </summary>
         public Uri? KeyId { get; set; }
+
+        /// <summary>
+        /// When does the certificate expire
+        /// </summary>
+        public DateTimeOffset? ExpiresOn { get; set; }
     }
 }

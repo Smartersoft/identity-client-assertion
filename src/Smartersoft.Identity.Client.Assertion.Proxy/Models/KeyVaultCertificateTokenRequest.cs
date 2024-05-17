@@ -16,6 +16,11 @@ namespace Smartersoft.Identity.Client.Assertion.Proxy.Models
         /// Name of the certificate you wish to use
         /// </summary>
         public string? CertificateName { get; set; }
+
+        /// <summary>
+        /// Skip the cache for the certificate
+        /// </summary>
+        public bool SkipCache { get; set; }
     }
 
     /// <summary>
