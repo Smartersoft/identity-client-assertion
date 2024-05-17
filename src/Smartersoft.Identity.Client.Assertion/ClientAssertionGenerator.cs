@@ -1,6 +1,7 @@
 ﻿using Azure.Core;
 using Azure.Security.KeyVault.Certificates;
 using Azure.Security.KeyVault.Keys.Cryptography;
+using Microsoft.Extensions.Caching.Memory;
 using System;
 using System.Collections.Generic;
 using System.Security.Cryptography;
@@ -19,7 +20,7 @@ namespace Smartersoft.Identity.Client.Assertion
     public static class ClientAssertionGenerator
     {
         /// <summary>
-        /// Encoded a byte array to a Base64Url encoded string.
+        /// Encode a byte array to a Base64Url encoded string.
         /// </summary>
         /// <param name="input">byte array</param>
         /// <returns>string</returns>
@@ -151,12 +152,17 @@ namespace Smartersoft.Identity.Client.Assertion
         /// <param name="kid">The Base64Url encoded hash of the certificate, use GetCertificateInfoFromKeyVault</param>
         /// <param name="tokenCredential">Use any TokenCredential (eg. new DefaultTokenCredential())</param>
         /// <param name="cancellationToken">Use cancellation token if preferred</param>
-        /// <remarks>Needs Key => Sign permission, the client assertion is signed in the KeyVault</remarks>
+        /// <remarks>Needs Key => Sign permission, the client assertion is signed in the Key Vault. Currently only RSA keys are supported</remarks>
         /// <returns>Signed client assertion</returns>
+        /// <exception cref="ArgumentNullException">If the keyId or kid is null</exception>
+        /// <exception cref="CryptographicException">The local cryptographic provider threw an exception.</exception>
+        /// <exception cref="InvalidOperationException">The key is invalid for the current operation.</exception>
+        /// <exception cref="NotSupportedException">The operation is not supported with the specified key.</exception>
+        /// <exception cref="Azure.RequestFailedException">The server returned an error. See System.Exception.Message for details returned from the server.</exception>
         public static async Task<string> GetSignedTokenWithKeyVaultKey(IDictionary<string, object> assertionClaims, Uri keyId, string kid, TokenCredential tokenCredential, CancellationToken cancellationToken = default)
         {
-            var unsignedToken = GetUnsignedToken(kid, assertionClaims);
-            var cryptographyClient = new CryptographyClient(keyId, tokenCredential);
+            var unsignedToken = GetUnsignedToken(kid!, assertionClaims);
+            var cryptographyClient = new CryptographyClient(keyId!, tokenCredential);
 
             // The signing takes place at the KeyVault, the private key never reaches the client.
             // This needs the `Key => Sign` permission, and counts as a KeyVault operation.
@@ -192,8 +198,13 @@ namespace Smartersoft.Identity.Client.Assertion
         /// <param name="clientId">Client Identifier</param>
         /// <param name="tokenCredential">Use any TokenCredential (eg. new DefaultTokenCredential())</param>
         /// <param name="cancellationToken">Use cancellation token if preferred</param>
-        /// <remarks>Needs Key => Sign permission, the client assertion is signed in the KeyVault</remarks>
+        /// <remarks>Needs Key => Sign permission, the client assertion is signed in the Key Vault. Currently only RSA keys are supported</remarks>
         /// <returns>Signed client assertion</returns>
+        /// <exception cref="ArgumentNullException">If the keyId, kid, audience, of clientId are null</exception>
+        /// <exception cref="CryptographicException">The local cryptographic provider threw an exception.</exception>
+        /// <exception cref="InvalidOperationException">The key is invalid for the current operation.</exception>
+        /// <exception cref="NotSupportedException">The operation is not supported with the specified key.</exception>
+        /// <exception cref="Azure.RequestFailedException">The server returned an error. See System.Exception.Message for details returned from the server.</exception>
         public static Task<string> GetSignedTokenWithKeyVaultKey(Uri keyId, string kid, string audience, string clientId, TokenCredential tokenCredential, CancellationToken cancellationToken = default)
         {
             return GetSignedTokenWithKeyVaultKey(GenerateClaimsForAudience(audience, clientId), keyId, kid, tokenCredential, cancellationToken);
@@ -206,7 +217,7 @@ namespace Smartersoft.Identity.Client.Assertion
         /// <param name="certificateName">Name of the certificate</param>
         /// <param name="tokenCredential">Use any TokenCredential (eg. new DefaultTokenCredential())</param>
         /// <param name="cancellationToken">Use cancellation token if preferred</param>
-        /// <remarks>Calls GetCertificate, which will download the public information about the certificate</remarks>
+        /// <remarks>Calls GetCertificate, which will download the public information about the certificate. Always mark your keys as NOT EXPORTABLE, or this is to no use.</remarks>
         /// <returns>CertificateInfo</returns>
         public static async Task<CertificateInfo> GetCertificateInfoFromKeyVault(Uri vaultUri, string certificateName, TokenCredential tokenCredential, CancellationToken cancellationToken = default)
         {
@@ -222,27 +233,49 @@ namespace Smartersoft.Identity.Client.Assertion
             {
                 CertificateName = certificateResult.Value.Name,
                 KeyId = certificateResult.Value.KeyId,
-                Kid = Base64UrlEncode(certificate.GetCertHash())
+                Kid = Base64UrlEncode(certificate.GetCertHash()),
+                ExpiresOn = certificateResult.Value.Properties.ExpiresOn
             };
         }
 
         /// <summary>
-        /// Fetches information about the certificate (should be cached!), and then signs a token with the info from the KeyVault
+        /// Fetches information about the certificate, and then signs a token with the info from the KeyVault
         /// </summary>
         /// <param name="assertionClaims">Claims in client assertion, use `GenerateClaimsForAudience` or `GenerateClaimsForTenant`</param>
         /// <param name="vaultUri">Uri of the KeyVault</param>
         /// <param name="certificateName">Name of certificate</param>
         /// <param name="tokenCredential">Use any TokenCredential (eg. new DefaultTokenCredential())</param>
         /// <param name="cancellationToken">Use cancellation token if preferred</param>
+        /// <param name="memoryCache">(optional) <see cref="IMemoryCache"/> to cache the certificate information</param>
         /// <returns>Signed client assertion</returns>
-        /// <remarks>`GetSignedTokenWithKeyVaultKey` is perferred over this method</remarks>
-        public static async Task<string> GetSignedTokenWithKeyVaultCertificate(IDictionary<string, object> assertionClaims, Uri vaultUri, string certificateName, TokenCredential tokenCredential, CancellationToken cancellationToken = default)
+        /// <remarks>Either supply the <paramref name="memoryCache"/> or use the <see cref="GetSignedTokenWithKeyVaultKey(Uri, string, string, string, TokenCredential, CancellationToken)"/> method</remarks>
+        public static async Task<string> GetSignedTokenWithKeyVaultCertificate(IDictionary<string, object> assertionClaims, Uri vaultUri, string certificateName, TokenCredential tokenCredential, CancellationToken cancellationToken = default, IMemoryCache? memoryCache = null)
         {
+            var cacheKey = $"{vaultUri}/{certificateName}";
+            if (memoryCache != null && memoryCache.TryGetValue(cacheKey, out CertificateInfo? certFromCache))
+            {
+                return await GetSignedTokenWithKeyVaultKey(assertionClaims, certFromCache!.KeyId!, certFromCache.Kid!, tokenCredential, cancellationToken);
+            }
+
             var certInfo = await GetCertificateInfoFromKeyVault(vaultUri, certificateName, tokenCredential, cancellationToken);
 
             if (certInfo.Kid == null || certInfo.KeyId == null)
             {
                 throw new ArgumentNullException(nameof(certInfo));
+            }
+
+            if (memoryCache != null)
+            {
+                MemoryCacheEntryOptions options = new MemoryCacheEntryOptions();
+                if (certInfo.ExpiresOn.HasValue)
+                {
+                    options.AbsoluteExpiration = certInfo.ExpiresOn;
+                }
+                else
+                {
+                    options.SetAbsoluteExpiration(TimeSpan.FromDays(1));
+                }
+                memoryCache.Set(cacheKey, certInfo, options);
             }
 
             return await GetSignedTokenWithKeyVaultKey(assertionClaims, certInfo.KeyId, certInfo.Kid, tokenCredential, cancellationToken);
@@ -267,20 +300,20 @@ namespace Smartersoft.Identity.Client.Assertion
         }
 
         /// <summary>
-        /// Fetches information about the certificate (should be cached!), and then signs a token with the info from the KeyVault
+        /// Fetches information about the certificate, and uses remote signing to sign the token in the KeyVault
         /// </summary>
-
         /// <param name="vaultUri">Uri of the KeyVault</param>
         /// <param name="certificateName">Name of certificate</param>
         /// <param name="audience">Assertion audience</param>
         /// <param name="clientId">Client Identifier</param>
         /// <param name="tokenCredential">Use any TokenCredential (eg. new DefaultTokenCredential())</param>
         /// <param name="cancellationToken">Use cancellation token if preferred</param>
+        /// <param name="memoryCache">(optional) <see cref="IMemoryCache"/> to cache the certificate information</param>
         /// <returns>Signed client assertion</returns>
-        /// <remarks>`GetSignedTokenWithKeyVaultKey` is perferred over this method</remarks>
-        public static Task<string> GetSignedTokenWithKeyVaultCertificate(Uri vaultUri, string certificateName, string audience, string clientId, TokenCredential tokenCredential, CancellationToken cancellationToken = default)
+        /// <remarks>Either use this method with the <paramref name="memoryCache"/> supplied, or use the <see cref="GetSignedTokenWithKeyVaultKey(IDictionary{string, object}, Uri, string, TokenCredential, CancellationToken)"/> method.</remarks>
+        public static Task<string> GetSignedTokenWithKeyVaultCertificate(Uri vaultUri, string certificateName, string audience, string clientId, TokenCredential tokenCredential, CancellationToken cancellationToken = default, IMemoryCache? memoryCache = null)
         {
-            return GetSignedTokenWithKeyVaultCertificate(GenerateClaimsForAudience(audience, clientId), vaultUri, certificateName, tokenCredential, cancellationToken);
+            return GetSignedTokenWithKeyVaultCertificate(GenerateClaimsForAudience(audience, clientId), vaultUri, certificateName, tokenCredential, cancellationToken, memoryCache);
         }
     }
 }

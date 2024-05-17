@@ -1,5 +1,6 @@
 ﻿using Azure.Core;
 using Azure.Identity;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Identity.Client;
 using System;
 using System.Threading;
@@ -52,6 +53,7 @@ namespace Smartersoft.Identity.Client.Assertion
         /// <param name="applicationBuilder">ConfidentialClientApplicationBuilder</param>
         /// <param name="vaultUri">Uri of the KeyVault</param>
         /// <param name="certificateName">Name of certificate</param>
+        /// <remarks>This method does not cache the certificate information, using <see cref="WithKeyVaultCertificate(ConfidentialClientApplicationBuilder, Uri, string, TokenCredential, IMemoryCache?)"/> is preferred.</remarks>
         public static ConfidentialClientApplicationBuilder WithKeyVaultCertificate(this ConfidentialClientApplicationBuilder applicationBuilder, Uri vaultUri, string certificateName)
         {
             return applicationBuilder.WithKeyVaultCertificate(vaultUri, certificateName, new DefaultAzureCredential());
@@ -64,12 +66,13 @@ namespace Smartersoft.Identity.Client.Assertion
         /// <param name="vaultUri">Uri of the KeyVault</param>
         /// <param name="certificateName">Name of certificate</param>
         /// <param name="tokenCredential">Use any TokenCredential (eg. new DefaultTokenCredential())</param>
-        public static ConfidentialClientApplicationBuilder WithKeyVaultCertificate(this ConfidentialClientApplicationBuilder applicationBuilder, Uri vaultUri, string certificateName, TokenCredential tokenCredential)
+        /// <param name="memoryCache">(optional) <see cref="IMemoryCache"/> to cache the certificate information</param>
+        public static ConfidentialClientApplicationBuilder WithKeyVaultCertificate(this ConfidentialClientApplicationBuilder applicationBuilder, Uri vaultUri, string certificateName, TokenCredential tokenCredential, IMemoryCache? memoryCache = null)
         {
             return applicationBuilder
                 //.WithAuthority(AzureCloudInstance.AzurePublic, tenantId)
                 .WithClientAssertion((AssertionRequestOptions options) =>
-                    ClientAssertionGenerator.GetSignedTokenWithKeyVaultCertificate(vaultUri, certificateName, options.TokenEndpoint, options.ClientID, tokenCredential, cancellationToken: options.CancellationToken)
+                    ClientAssertionGenerator.GetSignedTokenWithKeyVaultCertificate(vaultUri, certificateName, options.TokenEndpoint, options.ClientID, tokenCredential, cancellationToken: options.CancellationToken, memoryCache)
                 );
         }
 

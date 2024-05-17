@@ -23,7 +23,7 @@ namespace Smartersoft.Identity.Client.Assertion.Proxy.Controllers
         /// <param name="logger"></param>
         /// <param name="tokenCredential"></param>
         /// <param name="cache"></param>
-        public MsiController(ILogger<MsiController> logger, TokenCredential tokenCredential,IMemoryCache? cache = null)
+        public MsiController(ILogger<MsiController> logger, TokenCredential tokenCredential, IMemoryCache? cache = null)
         {
             _logger = logger;
             _cache = cache;
@@ -40,7 +40,7 @@ namespace Smartersoft.Identity.Client.Assertion.Proxy.Controllers
         public async Task<IActionResult> Forward([FromForm] Models.MsiRequest msiRequest, CancellationToken cancellationToken = default)
         {
             _logger.LogInformation("MSI request for {resource}", msiRequest.Resource);
-            
+
             var tokenResult = await _tokenCredential.GetTokenAsync(new Azure.Core.TokenRequestContext(new[] { FixResourceUrl(msiRequest.Resource) }), cancellationToken);
 
             return Ok(Models.MsiResponse.FromAzureAccessToken(tokenResult, msiRequest.Resource));
@@ -116,7 +116,7 @@ namespace Smartersoft.Identity.Client.Assertion.Proxy.Controllers
                 .WithAuthority(AzureCloudInstance.AzurePublic, tenant)
                 .WithCertificate(cert)
                 .Build();
-            
+
             var authResult = await app.AcquireTokenForClient(new[] { FixResourceUrl(msiRequest.Resource) }).ExecuteAsync(cancellationToken);
 
             return Ok(Models.MsiResponse.FromAuthenticationResult(authResult, msiRequest.Resource));
@@ -162,7 +162,7 @@ namespace Smartersoft.Identity.Client.Assertion.Proxy.Controllers
 
         private Task<CertificateInfo> GetCertificateInfoAsync(string subdomain, string certificateName, CancellationToken cancellationToken)
         {
-            if(_cache is not null)
+            if (_cache is not null)
             {
                 return _cache.GetOrCreateAsync($"cert-info-{subdomain}-{certificateName}", async entry =>
                 {

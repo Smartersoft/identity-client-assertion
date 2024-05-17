@@ -2,6 +2,7 @@
 using Azure.Identity;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Identity.Client;
 using System.Security.Cryptography.X509Certificates;
 
@@ -16,16 +17,18 @@ namespace Smartersoft.Identity.Client.Assertion.Proxy.Controllers
     {
         private readonly ILogger<TokenController> _logger;
         private readonly TokenCredential _tokenCredential;
+        private readonly IMemoryCache _memoryCache;
 
         /// <summary>
         /// TokenController constructor
         /// </summary>
         /// <param name="logger"></param>
         /// <param name="tokenCredential"></param>
-        public TokenController(ILogger<TokenController> logger, TokenCredential tokenCredential)
+        public TokenController(ILogger<TokenController> logger, TokenCredential tokenCredential, IMemoryCache memoryCache)
         {
             _logger = logger;
             _tokenCredential = tokenCredential;
+            _memoryCache = memoryCache;
         }
 
         /// <summary>
@@ -61,8 +64,18 @@ namespace Smartersoft.Identity.Client.Assertion.Proxy.Controllers
         public async Task<ActionResult<CertificateInfo>> KvKeyInfo([FromBody] Models.KeyVaultCertificateInfoRequest tokenRequest, CancellationToken cancellationToken)
         {
             _logger.LogInformation("Certificate info for Key Vault certificate {certificateName}", tokenRequest.CertificateName);
+            var cacheKey = $"{tokenRequest.KeyVaultUri}/{tokenRequest.CertificateName!}";
+            if (!tokenRequest.SkipCache && _memoryCache.TryGetValue(cacheKey, out CertificateInfo? cachedCertInfo))
+            {
+                return Ok(cachedCertInfo);
+            }
 
             var certInfo = await ClientAssertionGenerator.GetCertificateInfoFromKeyVault(tokenRequest.KeyVaultUri!, tokenRequest.CertificateName!, _tokenCredential, cancellationToken);
+
+            if (!tokenRequest.SkipCache)
+            {
+                _memoryCache.Set(cacheKey, certInfo, certInfo.ExpiresOn ?? DateTimeOffset.UtcNow.AddDays(1));
+            }
 
             return Ok(certInfo);
         }
@@ -81,7 +94,7 @@ namespace Smartersoft.Identity.Client.Assertion.Proxy.Controllers
             var app = ConfidentialClientApplicationBuilder
                 .Create(tokenRequest.ClientId)
                 .WithAuthority(AzureCloudInstance.AzurePublic, tokenRequest.TenantId)
-                .WithKeyVaultCertificate(tokenRequest.KeyVaultUri!, tokenRequest.CertificateName!, _tokenCredential)
+                .WithKeyVaultCertificate(tokenRequest.KeyVaultUri!, tokenRequest.CertificateName!, _tokenCredential, tokenRequest.SkipCache ? null : _memoryCache)
                 .Build();
 
             var authResult = await app

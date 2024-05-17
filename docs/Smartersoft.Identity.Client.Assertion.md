@@ -50,6 +50,7 @@ using Smartersoft.Identity.Client.Assertion;
 ## Get access token using certificate in KeyVault
 
 ```csharp
+    private readonly IMemoryCache? _injectedCache;
     public async Task<string> GetToken (CancellationToken cancellationToken)
     {
         // Create a token credential that suits your needs, used to access the KeyVault
@@ -66,7 +67,7 @@ using Smartersoft.Identity.Client.Assertion;
         var app = ConfidentialClientApplicationBuilder
             .Create(clientId)
             .WithAuthority(AzureCloudInstance.AzurePublic, tenantId)
-            .WithKeyVaultCertificate(new Uri(KeyVaultUri), certificateName, tokenCredential)
+            .WithKeyVaultCertificate(new Uri(KeyVaultUri), certificateName, tokenCredential, _injectedCache)
             .Build();
 
         // Use the app, just like before
@@ -131,8 +132,7 @@ It can be loaded only once and saved in a config file to reduce the calls to the
 Why is this solution more secure that others?
 This solution will **prevent** attackers getting **persistent access** in case of a breach.
 
-All other samples I've seen use the [SecretClient.GetSecretAsync](https://docs.microsoft.com/dotnet/api/azure.security.keyvault.secrets.secretclient.getsecretasync?view=azure-dotnet&wt.mc_id=SEC-MVP-5004985) method to **Get the secret**.
-It then converts it to a **X509Certificate2** that is then used for signing.
+All other samples I've seen use the [CertificateClient.DownloadCertificateAsync](https://learn.microsoft.com/en-us/dotnet/api/azure.security.keyvault.certificates.certificateclient.downloadcertificateasync?view=azure-dotnet&wt.mc_id=SEC-MVP-5004985) method to **Get the certificate information** and **Download the private key**.
 If the app can Get the secret, an attacker can do the same.
 
 This way the seemingly secure certificate can be extracted by some malicious actor, and if the breach goes undetected they now have a certificate that can possibly access data in several tenants. Without getting noticed.
@@ -156,4 +156,5 @@ These packages are [licensed](https://github.com/Smartersoft/identity-client-ass
 
 ## Open-source
 
-This package is open-source for a reason. It's developed by [Stephan van Rooij](https://svrooij.io/), I'm a talented software architect, but people make mistakes. Always check out what's doing and make sure it doesn't do anything strange with the tokens. And that I didn't make any rudimentary mistakes.
+This package is open-source for a reason. It's developed by [Stephan van Rooij](https://svrooij.io/), people make mistakes. Always check out what's doing and make sure it doesn't do anything strange with the tokens.
+
