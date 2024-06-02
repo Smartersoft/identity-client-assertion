@@ -1,0 +1,29 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+	  <AssemblyName>TokenMagician</AssemblyName>
+	  <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+	  <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Svrooij.PowerShell.DependencyInjection" Version="1.1.4" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Smartersoft.Identity.Client.Assertion\Smartersoft.Identity.Client.Assertion.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="TokenMagician.psd1">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="TokenMagician.psm1">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+</Project>

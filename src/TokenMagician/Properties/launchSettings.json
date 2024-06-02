@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "TokenMagician": {
+      "executablePath": "C:\\Program Files\\PowerShell\\7\\pwsh.exe",
+      "commandName": "Executable",
+      "commandLineArgs": "-noexit -command &{ Import-Module .\\TokenMagician.dll -Verbose }"
+    }
+  }
+}
