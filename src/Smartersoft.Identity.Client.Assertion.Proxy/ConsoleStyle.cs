@@ -14,7 +14,7 @@ internal static class ConsoleStyle
 |/     \|(_______/      |_/    \/   \_/          |/       |/   \__/(_______)|/     \|   \_/   
                                                                                               
 ";
-    public static void WriteHeader(int port = 5616)
+    public static void WriteHeader(int port = 5616, bool useAzCli = false)
     {
         Console.WriteLine(Header);
         Console.WriteLine("##############################################################");
@@ -24,6 +24,7 @@ internal static class ConsoleStyle
         Console.WriteLine("#");
         Console.WriteLine("# Repository: https://github.com/Smartersoft/identity-client-assertion");
         Console.WriteLine("# Documentation: http://localhost:{0}/swagger/index.html", port);
+        Console.WriteLine("# Credential: {0}", useAzCli ? "AzureCliCredential (--az-cli)" : "DefaultAzureCredential");
         Console.WriteLine("#");
         Console.WriteLine("# dotnet tool update --global Smartersoft.Identity.Client.Assertion.Proxy");
         Console.WriteLine("#");

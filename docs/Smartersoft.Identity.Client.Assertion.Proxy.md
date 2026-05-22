@@ -21,7 +21,9 @@ This api is meant to be used during development only! For production check out [
 This proxy requires you to have `.NET 8` installed, and the `dotnet` command available in your terminal, make sure you install that beforehand.
 
 1. Install the proxy with `dotnet tool install --global Smartersoft.Identity.Client.Assertion.Proxy`
-2. Run the proxy with `az-kv-proxy` or `az-kv-proxy --urls http://localhost:5616` if you wish to use another port
+2. Run the proxy with `az-kv-proxy`. Optional flags:
+   - `--port <number>` — listen on a different port (default: `5616`).
+   - `--az-cli` — use `AzureCliCredential` instead of `DefaultAzureCredential` (requires `az login`). Useful when you want deterministic auth from your `az` session rather than the chained credential's lookup order. Per-request tenants on the `/{tenant}/...` MSI endpoints and the `tenantId` field in token requests still work via `AdditionallyAllowedTenants`.
 3. Open de browser and go to [/swagger/index.html](http://localhost:5616/swagger/index.html)
 4. Try the endpoints
 

@@ -8,7 +8,9 @@ using System.Text.Json.Serialization;
 var portIndex = Array.IndexOf(args, "--port");
 int port = portIndex > -1 && args.Length > portIndex + 1 && int.TryParse(args[portIndex + 1], out int p) ? p : 5616;
 
-ConsoleStyle.WriteHeader(port);
+var useAzCli = Array.IndexOf(args, "--az-cli") > -1;
+
+ConsoleStyle.WriteHeader(port, useAzCli);
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,15 +18,18 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddMemoryCache();
 
-builder.Services.AddSingleton<TokenCredential>(new DefaultAzureCredential(
-    new DefaultAzureCredentialOptions
+builder.Services.AddSingleton<TokenCredential>(useAzCli
+    ? new AzureCliCredential(new AzureCliCredentialOptions
+    {
+        AdditionallyAllowedTenants = { "*" }, // Allow all tenants
+    })
+    : new DefaultAzureCredential(new DefaultAzureCredentialOptions
     {
         AdditionallyAllowedTenants = { "*" }, // Allow all tenants
         ExcludeEnvironmentCredential = true, // Don't use environment variables (even interactive is better)
         ExcludeInteractiveBrowserCredential = false,
         ExcludeManagedIdentityCredential = true, // Don't run this api in production!
-    }
-    ));
+    }));
 
 builder.Services.AddControllers()
     .AddJsonOptions(x =>
